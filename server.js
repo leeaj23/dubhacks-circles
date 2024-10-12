@@ -64,6 +64,20 @@ app.get("/profile", requiresAuth(), (req, res) => {
   res.send(JSON.stringify(req.oidc.user, null, 2));
 });
 
+app.get("/matches", requiresAuth(), async (req, res) => {
+  const { uid } = req.params;
+  const docRef = doc(collection(db, "users"), uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const matches = docSnap.data().matches;
+    console.log(matches);
+    res.json(matches);
+  } else {
+    res.status(404).json({ success: false, message: "User not found" });
+  }
+})
+
 const saveUserToFirestore = async (user) => {
   try {
     if (!user) return;
