@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const port = 3000;
 const { auth, requiresAuth } = require("express-openid-connect");
+const db = require("./firebase.js");
 
 const config = {
   authRequired: false,
@@ -32,3 +33,20 @@ app.get('/', (req, res) => {
 app.get('/profile', requiresAuth(), (req, res) => {
   res.send(JSON.stringify(req.oidc.user, null, 2));
 });
+
+const saveUserToFirestore = async (user) => {
+  try {
+    if (!user)  return;
+    const docRef = doc(collection(db, 'users'), user.clientID);
+    const docSnap = await getDoc(docRef);
+
+    await setDoc(docRef, {
+      name: user.name,
+      email: user.email,
+      createdAt: new Date().toISOString(),
+      matches: []
+    });
+  } catch (error) {
+    console.error("Error writing document: ", error);
+  }
+};
