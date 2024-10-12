@@ -4,6 +4,13 @@ const bodyParser = require("body-parser");
 const port = 3000;
 const { auth, requiresAuth } = require("express-openid-connect");
 const { initializeApp } = require("firebase/app");
+const {
+  getFirestore,
+  collection,
+  getDoc,
+  doc,
+  setDoc,
+} = require("firebase/firestore");
 
 const firebaseConfig = {
   apiKey: "AIzaSyCtWt4Lba8nqR7aLnwGeo67xDKiVDQxmbQ",
@@ -16,6 +23,7 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 const config = {
   authRequired: false,
@@ -37,6 +45,18 @@ app.listen(port, () => {
 
 app.get("/", (req, res) => {
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+});
+
+app.get("/profile/:uid", requiresAuth(), async (req, res) => {
+  const { uid } = req.params;
+  const docRef = doc(collection(db, "users"), uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    res.json({ success: true, user: docSnap.data() });
+  } else {
+    res.status(404).json({ success: false, message: "User not found" });
+  }
 });
 
 // The /profile route will show the user profile as JSON
