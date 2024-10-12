@@ -25,8 +25,16 @@
         <main class="container">
             <nav>
                 <ul>
-                    <li><a href="/"><img src="../assets/icon.png" style="width: 150px;"></a></li>
-                    <li><a href="/"><img src="../assets/text.png" style="width: 150px;"></a></li>
+                    <li>
+                        <a href="/"
+                            ><img src="../assets/icon.png" style="width: 150px"
+                        /></a>
+                    </li>
+                    <li>
+                        <a href="/"
+                            ><img src="../assets/text.png" style="width: 150px"
+                        /></a>
+                    </li>
                 </ul>
                 <ul>
                     <li><a href="#about">About</a></li>
@@ -46,8 +54,10 @@
                         margin-left: 20px;
                     "
                 >
-                    <h1 style="display: block; line-height: 0">John Doe</h1>
-                    <p>Some High School, WA</p>
+                    <h1 id="username" style="display: block; line-height: 0">
+                        John Doe
+                    </h1>
+                    <p id="lastSchool">Some High School, WA</p>
                 </div>
                 <div
                     style="
@@ -102,5 +112,71 @@
                 </div>
             </article>
         </main>
+        <script>
+            // check if id in query param
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get("id");
+            if (!id) {
+                window.location.href = "/";
+            }
+
+            // fetch user data
+            fetch("/profile/" + id)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success) {
+                        data = data.user;
+                        if (data.bio == "") {
+                            document.getElementById("bio").innerHTML =
+                                "<i>No bio provided</i>";
+                        } else {
+                            document.getElementById("bio").innerText = data.bio;
+                        }
+
+                        try {
+                            if (
+                                data.inCommon != null &&
+                                data.inCommon.length == 0
+                            ) {
+                                document.getElementById(
+                                    "inCommonTitle",
+                                ).innerText =
+                                    "You and " +
+                                    data.name +
+                                    " have nothing in common";
+                            } else {
+                                document.getElementById(
+                                    "inCommonTitle",
+                                ).innerText =
+                                    "You and " +
+                                    data.name +
+                                    " have some things in common:";
+                                document.getElementById(
+                                    "inCommonList",
+                                ).innerHTML = "";
+                                data.inCommon.forEach((item) => {
+                                    document.getElementById(
+                                        "inCommonList",
+                                    ).innerHTML += "<li>" + item + "</li>";
+                                });
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+
+                        document.getElementById("username").innerText =
+                            data.name;
+                        if (data.schools.length > 0) {
+                            document.getElementById("lastSchool").innerText =
+                                data.schools[data.schools.length - 1].name;
+                        } else {
+                            document.getElementById("lastSchool").innerHTML =
+                                "<i>No schools provided</i>";
+                        }
+                    } else {
+                        window.location.href = "/";
+                    }
+                });
+        </script>
     </body>
 </html>
