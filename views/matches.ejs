@@ -30,8 +30,8 @@
                 <table class="table table-bordered">
                 <% matches.forEach( (match) => { %>
                     <tr>      
-                    <td>Username: <b><%= match.uid %></b></td> 
-                    <td><a href="/viewprofile?username=<%= profile.username %>">View</a></td> 
+                    <td><b><%= match.name %></b></td> 
+                    <td><a href="/profile/?id=<%= match.uid %>">View</a></td> 
                     </tr>                      
                 <% }) %>
                 </table>
