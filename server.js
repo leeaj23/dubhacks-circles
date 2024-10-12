@@ -82,6 +82,7 @@ app.get("/myuser", requiresAuth(), (req, res) => {
         interests: [],
         schools: [],
         bio: "",
+        matches: []
       };
 
       setDoc(docRef, user).then(() => {

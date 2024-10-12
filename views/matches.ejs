@@ -8,13 +8,19 @@
         <main class="container">
             <nav>
                 <ul>
-                    <li><a href="/"><img src="assets/icon.png" style="width: 150px;"></a></li>
-                    <li><a href="/"><img src="assets/text.png" style="width: 150px;"></a></li>
+                    <li>
+                        <a href="/"
+                            ><img src="../assets/icon.png" style="width: 150px"
+                        /></a>
+                    </li>
+                    <li>
+                        <a href="/"
+                            ><img src="../assets/text.png" style="width: 150px"
+                        /></a>
+                    </li>
                 </ul>
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#demo">Demo</a></li>
+                <ul id="actions">
+                    <li><a href="/login">Login</a></li>
                 </ul>
             </nav>
 
@@ -34,5 +40,18 @@
             <p>There are no matches for you in the system.</p>
             <% } %>
         </main>
+        <script>
+            fetch("/isauthed")
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.isAuthed) {
+                        document.getElementById("actions").innerHTML = `
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/profile/me">Your Profile</a></li>
+                  <li><a href="/logout">Logout</a></li>
+                `;
+                    }
+                });
+        </script>
     </body>
 </html>
