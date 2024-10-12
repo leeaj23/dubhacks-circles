@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Profile Form</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    </head>
+    <body>
+        <main class="container">
+            <nav>
+                <ul>
+                    <li><a href="/"><img src="../assets/icon.png" style="width: 150px;"></a></li>
+                    <li><a href="/"><img src="../assets/text.png" style="width: 150px;"></a></li>
+                </ul>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                </ul>
+            </nav>
+            <form>
+                <fieldset>
+                    <label>
+                    First name
+                    <input
+                        name="first_name"
+                        placeholder="First name"
+                        autocomplete="given-name"
+                    />
+                    </label>
+                    <label>
+                        Last name
+                        <input
+                            name="last_name"
+                            placeholder="Last name"
+                            autocomplete="last-name"
+                        />
+                        </label>
+                    <label>
+                        Email
+                        <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        autocomplete="email"
+                        />
+                    </label>
+                    </fieldset>
+                
+                    <input
+                    type="submit"
+                    value="Subscribe"
+                    />
+                </form>
+            </main>
+    </body>
+</html>

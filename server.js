@@ -59,7 +59,6 @@ app.get("/profile/:uid", requiresAuth(), async (req, res) => {
 app.get("/myuser", requiresAuth(), (req, res) => {
   var uid = req.oidc.user.sub;
 
-  // grab from firestore, if doesn't exist, create
   const docRef = doc(db, "users", uid);
   getDoc(docRef).then((docSnap) => {
     if (docSnap.exists()) {
@@ -85,3 +84,18 @@ app.get("/myuser", requiresAuth(), (req, res) => {
 app.listen(port, () => {
   console.log(`Circles listening on port ${port}`);
 });
+
+app.get("/matches", requiresAuth(), async (req, res) => {
+  const { uid } = req.params;
+  const docRef = doc(collection(db, "users"), uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const matches = docSnap.data().matches;
+    console.log(matches);
+    res.json(matches);
+  } else {
+    res.status(404).json({ success: false, message: "User not found" });
+  }
+})
+
