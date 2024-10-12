@@ -36,10 +36,8 @@
                         /></a>
                     </li>
                 </ul>
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#demo">Demo</a></li>
+                <ul id="actions">
+                    <li><a href="/login">Login</a></li>
                 </ul>
             </nav>
             <article style="margin-top: 30px">
@@ -78,6 +76,9 @@
                     <p id="bio" style="font-size: 26px">
                         Hey there! I'm John Doe, a high school student from WA.
                     </p>
+                    <button id="editProfile" class="contrast">
+                        Edit Profile
+                    </button>
                 </div>
             </article>
         </main>
@@ -89,7 +90,15 @@
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.isAuthed) {
+                        document.getElementById("actions").innerHTML = `
+                <li><a href="/">Home</a></li>
+                <li><a href="/profile/me">Your Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+              `;
+                    }
+                    if (data.isAuthed) {
                         var id = data.uid;
+                        console.log("User is authenticated with ID: " + id);
                         // fetch user data
                         fetch("/profile/" + id)
                             .then((res) => res.json())
@@ -104,44 +113,6 @@
                                         document.getElementById(
                                             "bio",
                                         ).innerText = data.bio;
-                                    }
-
-                                    try {
-                                        if (
-                                            data.inCommon != null &&
-                                            data.inCommon.length == 0
-                                        ) {
-                                            document.getElementById(
-                                                "inCommonTitle",
-                                            ).innerText =
-                                                "You and " +
-                                                data.name +
-                                                " have nothing in common";
-                                        } else {
-                                            document.getElementById(
-                                                "inCommonTitle",
-                                            ).innerText =
-                                                "You and " +
-                                                data.name +
-                                                " have some things in common:";
-                                            document.getElementById(
-                                                "inCommonList",
-                                            ).innerHTML = "";
-                                            data.inCommon.forEach((item) => {
-                                                document.getElementById(
-                                                    "inCommonList",
-                                                ).innerHTML +=
-                                                    "<li>" + item + "</li>";
-                                            });
-                                        }
-                                    } catch (e) {
-                                        console.log(e);
-                                        document.getElementById(
-                                            "inCommonTitle",
-                                        ).innerText =
-                                            "You and " +
-                                            data.name +
-                                            " have nothing in common";
                                     }
 
                                     document.getElementById(
