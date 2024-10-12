@@ -69,13 +69,16 @@ const saveUserToFirestore = async (user) => {
     if (!user) return;
     const docRef = doc(collection(db, "users"), user.clientID);
     const docSnap = await getDoc(docRef);
-
-    await setDoc(docRef, {
-      name: user.name,
-      email: user.email,
-      createdAt: new Date().toISOString(),
-      matches: [],
-    });
+    if (docSnap.exists()) {
+      const collections = docSnap.data().matches || [];
+      await setDoc(docRef, {
+        name: user.name,
+        email: user.email,
+        createdAt: new Date().toISOString(),
+        matches: collections});
+    } else {
+        await setDoc(docRef, {matches: []});
+    }
   } catch (error) {
     console.error("Error writing document: ", error);
   }
