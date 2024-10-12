@@ -12,6 +12,8 @@ const {
   setDoc,
 } = require("firebase/firestore");
 
+app.set('view engine', 'ejs');
+
 // Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCtWt4Lba...",
@@ -94,14 +96,14 @@ app.listen(port, () => {
 });
 
 app.get("/matches", requiresAuth(), async (req, res) => {
-  const { uid } = req.params;
+  var uid = req.oidc.user.sub;
   const docRef = doc(collection(db, "users"), uid);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     const matches = docSnap.data().matches;
     console.log(matches);
-    res.json(matches);
+    res.render('matches', {'matches': matches});
   } else {
     res.status(404).json({ success: false, message: "User not found" });
   }
