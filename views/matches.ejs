@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Circles</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    </head>
+    <body>
+        <main class="container">
+            <nav>
+                <ul>
+                    <li><a href="/"><img src="assets/icon.png" style="width: 150px;"></a></li>
+                    <li><a href="/"><img src="assets/text.png" style="width: 150px;"></a></li>
+                </ul>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                </ul>
+            </nav>
+
+            <% if (matches && matches.length > 0) { %>
+                <p>Here are all of your matches:</p>
+                <p>
+                <table class="table table-bordered">
+                <% matches.forEach( (match) => { %>
+                    <tr>      
+                    <td>Username: <b><%= match.uid %></b></td> 
+                    <td><a href="/viewprofile?username=<%= profile.username %>">View</a></td> 
+                    </tr>                      
+                <% }) %>
+                </table>
+                </p>
+            <% } else { %>
+            <p>There are matches for you in the system.</p>
+            <% } %>
+        </main>
+    </body>
+</html>
