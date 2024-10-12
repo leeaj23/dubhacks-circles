@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const port = 3000;
-const { auth } = require("express-openid-connect");
+const { auth, requiresAuth } = require("express-openid-connect");
 
 const config = {
   authRequired: false,
@@ -20,4 +20,15 @@ app.use(bodyParser.json());
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+});
+
+app.get('/', (req, res) => {
+  res.send(
+    req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out'
+  )
+});
+
+// The /profile route will show the user profile as JSON
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user, null, 2));
 });
