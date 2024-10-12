@@ -12,8 +12,9 @@ const {
   setDoc,
 } = require("firebase/firestore");
 
+// Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyCtWt4Lba8nqR7aLnwGeo67xDKiVDQxmbQ",
+  apiKey: "AIzaSyCtWt4Lba...",
   authDomain: "circles-9f709.firebaseapp.com",
   projectId: "circles-9f709",
   storageBucket: "circles-9f709.appspot.com",
@@ -25,6 +26,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
+// Express OpenID Connect configuration
 const config = {
   authRequired: false,
   auth0Logout: true,
@@ -35,13 +37,8 @@ const config = {
 };
 
 app.use(auth(config));
-
 app.use(express.static("public"));
 app.use(bodyParser.json());
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
 
 app.get("/", (req, res) => {
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
@@ -49,7 +46,7 @@ app.get("/", (req, res) => {
 
 app.get("/profile/:uid", requiresAuth(), async (req, res) => {
   const { uid } = req.params;
-  const docRef = doc(collection(db, "users"), uid);
+  const docRef = doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
@@ -59,9 +56,33 @@ app.get("/profile/:uid", requiresAuth(), async (req, res) => {
   }
 });
 
-// The /profile route will show the user profile as JSON
-app.get("/profile", requiresAuth(), (req, res) => {
-  res.send(JSON.stringify(req.oidc.user, null, 2));
+app.get("/myuser", requiresAuth(), (req, res) => {
+  var uid = req.oidc.user.sub;
+
+  const docRef = doc(db, "users", uid);
+  getDoc(docRef).then((docSnap) => {
+    if (docSnap.exists()) {
+      res.json({ success: true, user: docSnap.data() });
+    } else {
+      var user = {
+        uid: uid,
+        name: req.oidc.user.name,
+        email: req.oidc.user.email,
+        picture: req.oidc.user.picture,
+        interests: [],
+        schools: [],
+        bio: "",
+      };
+
+      setDoc(docRef, user).then(() => {
+        res.json({ success: true, user: user });
+      });
+    }
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Circles listening on port ${port}`);
 });
 
 app.get("/matches", requiresAuth(), async (req, res) => {
@@ -78,22 +99,3 @@ app.get("/matches", requiresAuth(), async (req, res) => {
   }
 })
 
-const saveUserToFirestore = async (user) => {
-  try {
-    if (!user) return;
-    const docRef = doc(collection(db, "users"), user.clientID);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const collections = docSnap.data().matches || [];
-      await setDoc(docRef, {
-        name: user.name,
-        email: user.email,
-        createdAt: new Date().toISOString(),
-        matches: collections});
-    } else {
-        await setDoc(docRef, {matches: []});
-    }
-  } catch (error) {
-    console.error("Error writing document: ", error);
-  }
-};
