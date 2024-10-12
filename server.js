@@ -3,7 +3,19 @@ const app = express();
 const bodyParser = require("body-parser");
 const port = 3000;
 const { auth, requiresAuth } = require("express-openid-connect");
-const db = require("./firebase.js");
+const { initializeApp } = require("firebase/app");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtWt4Lba8nqR7aLnwGeo67xDKiVDQxmbQ",
+  authDomain: "circles-9f709.firebaseapp.com",
+  projectId: "circles-9f709",
+  storageBucket: "circles-9f709.appspot.com",
+  messagingSenderId: "212292467729",
+  appId: "1:212292467729:web:bd97f37be77b3da95805b0",
+  measurementId: "G-7XMYQT401W",
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
 
 const config = {
   authRequired: false,
@@ -23,28 +35,26 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
 
-app.get('/', (req, res) => {
-  res.send(
-    req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out'
-  )
+app.get("/", (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
 });
 
 // The /profile route will show the user profile as JSON
-app.get('/profile', requiresAuth(), (req, res) => {
+app.get("/profile", requiresAuth(), (req, res) => {
   res.send(JSON.stringify(req.oidc.user, null, 2));
 });
 
 const saveUserToFirestore = async (user) => {
   try {
-    if (!user)  return;
-    const docRef = doc(collection(db, 'users'), user.clientID);
+    if (!user) return;
+    const docRef = doc(collection(db, "users"), user.clientID);
     const docSnap = await getDoc(docRef);
 
     await setDoc(docRef, {
       name: user.name,
       email: user.email,
       createdAt: new Date().toISOString(),
-      matches: []
+      matches: [],
     });
   } catch (error) {
     console.error("Error writing document: ", error);
