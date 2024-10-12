@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -162,6 +162,10 @@
                             }
                         } catch (e) {
                             console.log(e);
+                            document.getElementById("inCommonTitle").innerText =
+                                "You and " +
+                                data.name +
+                                " have nothing in common";
                         }
 
                         document.getElementById("username").innerText =

@@ -56,6 +56,14 @@ app.get("/profile/:uid", requiresAuth(), async (req, res) => {
   }
 });
 
+app.get("/isauthed", (req, res) => {
+  if (req.oidc.isAuthenticated()) {
+    res.json({ isAuthed: req.oidc.isAuthenticated(), uid: req.oidc.user.sub });
+  } else {
+    res.json({ isAuthed: req.oidc.isAuthenticated() });
+  }
+});
+
 app.get("/myuser", requiresAuth(), (req, res) => {
   var uid = req.oidc.user.sub;
 
@@ -97,5 +105,4 @@ app.get("/matches", requiresAuth(), async (req, res) => {
   } else {
     res.status(404).json({ success: false, message: "User not found" });
   }
-})
-
+});

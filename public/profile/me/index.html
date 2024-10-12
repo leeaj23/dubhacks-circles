@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Profile Screen</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <style>
+            :root {
+                --primary: #fec20f;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <nav>
+                <ul>
+                    <li>
+                        <a href="/"
+                            ><img src="/assets/icon.png" style="width: 150px"
+                        /></a>
+                    </li>
+                    <li>
+                        <a href="/"
+                            ><img src="/assets/text.png" style="width: 150px"
+                        /></a>
+                    </li>
+                </ul>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                </ul>
+            </nav>
+            <article style="margin-top: 30px">
+                <img
+                    src="/assets/profile.png"
+                    style="border-radius: 9999px; width: 120px"
+                />
+                <div
+                    style="
+                        display: inline-block;
+                        transform: translateY(20px);
+                        margin-left: 20px;
+                    "
+                >
+                    <h1 id="username" style="display: block; line-height: 0">
+                        John Doe
+                    </h1>
+                    <p id="lastSchool">Some High School, WA</p>
+                </div>
+                <div
+                    style="
+                        display: inline-block;
+                        transform: translateY(20px);
+                        margin-left: 20px;
+                        float: right;
+                    "
+                ></div>
+                <hr />
+                <div
+                    style="
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-right: 50px;
+                    "
+                >
+                    <p id="bio" style="font-size: 26px">
+                        Hey there! I'm John Doe, a high school student from WA.
+                    </p>
+                </div>
+            </article>
+        </main>
+        <script>
+            // get /isauthed
+            //
+
+            fetch("/isauthed")
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.isAuthed) {
+                        var id = data.uid;
+                        // fetch user data
+                        fetch("/profile/" + id)
+                            .then((res) => res.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    data = data.user;
+                                    if (data.bio == "") {
+                                        document.getElementById(
+                                            "bio",
+                                        ).innerHTML = "<i>No bio provided</i>";
+                                    } else {
+                                        document.getElementById(
+                                            "bio",
+                                        ).innerText = data.bio;
+                                    }
+
+                                    try {
+                                        if (
+                                            data.inCommon != null &&
+                                            data.inCommon.length == 0
+                                        ) {
+                                            document.getElementById(
+                                                "inCommonTitle",
+                                            ).innerText =
+                                                "You and " +
+                                                data.name +
+                                                " have nothing in common";
+                                        } else {
+                                            document.getElementById(
+                                                "inCommonTitle",
+                                            ).innerText =
+                                                "You and " +
+                                                data.name +
+                                                " have some things in common:";
+                                            document.getElementById(
+                                                "inCommonList",
+                                            ).innerHTML = "";
+                                            data.inCommon.forEach((item) => {
+                                                document.getElementById(
+                                                    "inCommonList",
+                                                ).innerHTML +=
+                                                    "<li>" + item + "</li>";
+                                            });
+                                        }
+                                    } catch (e) {
+                                        console.log(e);
+                                        document.getElementById(
+                                            "inCommonTitle",
+                                        ).innerText =
+                                            "You and " +
+                                            data.name +
+                                            " have nothing in common";
+                                    }
+
+                                    document.getElementById(
+                                        "username",
+                                    ).innerText = data.name;
+                                    if (data.schools.length > 0) {
+                                        document.getElementById(
+                                            "lastSchool",
+                                        ).innerText =
+                                            data.schools[
+                                                data.schools.length - 1
+                                            ].name;
+                                    } else {
+                                        document.getElementById(
+                                            "lastSchool",
+                                        ).innerHTML =
+                                            "<i>No schools provided</i>";
+                                    }
+                                } else {
+                                    window.location.href = "/";
+                                }
+                            });
+                    } else {
+                        window.location.href = "/login";
+                    }
+                });
+        </script>
+    </body>
+</html>
