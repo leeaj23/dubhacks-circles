@@ -23,10 +23,20 @@
     </head>
     <body>
         <main class="container">
-            <img
-                src="/assets/text.png"
-                style="width: 150px; margin-top: 10px"
-            />
+            <nav>
+                <ul>
+                    <li>
+                        <a href="/"
+                            ><img
+                                src="/assets/circlesbs.png"
+                                style="width: 200px"
+                        /></a>
+                    </li>
+                </ul>
+                <ul id="actions">
+                    <li><a href="/login">Login</a></li>
+                </ul>
+            </nav>
             <article style="margin-top: 30px">
                 <h5>Your Chats</h5>
                 <table class="table">
@@ -43,6 +53,23 @@
             document.addEventListener("DOMContentLoaded", () => {
                 const yourChats = document.getElementById("yourChats");
                 const chatTemplate = document.getElementById("chatTemplate");
+
+                fetch("/isauthed")
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.isAuthed) {
+                            document.getElementById("actions").innerHTML = `
+                              <li><a href="/matches">Matches</a></li>
+                              <li><a href="/chat">Chats</a></li>
+                              <li><a href="/profile/me">Your Profile</a></li>
+                              <li><a href="/logout">Logout</a></li>
+                `;
+                            if (data.uid == id) {
+                                // redirect to /profile/me
+                                window.location.href = "/profile/me";
+                            }
+                        }
+                    });
 
                 fetch("/chats")
                     .then((res) => res.json())

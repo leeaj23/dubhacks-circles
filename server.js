@@ -248,10 +248,16 @@ app.post("/chats/:chatid/messages", requiresAuth(), async (req, res) => {
       timestamp: new Date().toISOString(),
     };
 
-    // Append the new message to the messages array
-    const updatedMessages = chatData.messages
-      ? [...chatData.messages, newMessage]
-      : [newMessage];
+    var updatedMessages;
+
+    if (chatData.messages.length > 0) {
+      // Append the new message to the messages array
+      updatedMessages = chatData.messages
+        ? [...chatData.messages, newMessage]
+        : [newMessage];
+    } else {
+      updatedMessages = [newMessage];
+    }
 
     // Update the chat document in Firestore
     await setDoc(chatRef, { ...chatData, messages: updatedMessages });
