@@ -424,6 +424,7 @@ app.get("/matches", requiresAuth(), async (req, res) => {
       name: match.name,
       schools: match.schools,
       uid: match.uid,
+      picture: match.picture,
     }));
 
     console.log(matchedUsers);

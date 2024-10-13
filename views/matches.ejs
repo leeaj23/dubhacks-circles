@@ -18,22 +18,27 @@
                     <li><a href="/login">Login</a></li>
                 </ul>
             </nav>
-
-            <% if (matches && matches.length > 0) { %>
-                <p>Here are all of your matches:</p>
-                <p>
-                <table class="table table-bordered">
-                <% matches.forEach( (match) => { %>
-                    <tr>
-                    <td><b><%= match.name %></b></td>
-                    <td><a href="/profile/?id=<%= match.uid %>">View</a></td>
-                    </tr>
-                <% }) %>
+            <article style="margin-top: 30px">
+                <h5>Your Matches</h5>
+                <table class="table">
+                    <tbody id="yourChats">
+                        <% if (matches && matches.length > 0) { %>
+                            <p>
+                            <table class="table table-bordered">
+                            <% matches.forEach( (match) => { %>
+                                <tr style="margin-bottom: 10px;">
+                                    <td><img id="img" src="<%=match.picture%>" style="width: 50px; margin-right:10px; border-radius:9999px"/>     <b><%= match.name %></b></td>
+                                    <td><a href="/profile/?id=<%= match.uid %>">View</a></td>
+                                </tr>
+                            <% }) %>
+                            </table>
+                            </p>
+                        <% } else { %>
+                        <p>There are no matches for you in the system.</p>
+                        <% } %>
+                    </tbody>
                 </table>
-                </p>
-            <% } else { %>
-            <p>There are no matches for you in the system.</p>
-            <% } %>
+            </article>
         </main>
         <script>
             fetch("/isauthed")
