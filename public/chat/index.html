@@ -68,6 +68,10 @@
                                 // redirect to /profile/me
                                 window.location.href = "/profile/me";
                             }
+
+                            if (localStorage.getItem("verified") != "true") {
+                                window.location.href = "/verify";
+                            }
                         }
                     });
 
