@@ -30,6 +30,7 @@
             href="https://unpkg.com/leaflet/dist/leaflet.css"
         />
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     </head>
     <body>
         <main class="container">
@@ -217,6 +218,29 @@
                                                     Swal.showLoading();
                                                 },
                                             });
+
+                                            fetch("/suggestion/" + city)
+                                                .then((res) => res.json())
+                                                .then((data) => {
+                                                    Swal.close();
+                                                    Swal.fire({
+                                                        background:
+                                                            "var(--pico-background-color)",
+                                                        html:
+                                                            '<div style="color: black">' +
+                                                            marked.parse(
+                                                                data.response +
+                                                                    "</div>",
+                                                            ),
+                                                    });
+                                                })
+                                                .catch((err) => {
+                                                    Swal.fire(
+                                                        "Error",
+                                                        "Failed to get the nearest city.",
+                                                        "error",
+                                                    );
+                                                });
                                         })
                                         .catch((err) => {
                                             Swal.fire(

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Verification</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.3/dist/sweetalert2.all.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.3/dist/sweetalert2.min.css"
+        />
+        <style>
+            :root {
+                --primary: #fec20f;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <img
+                src="/assets/text.png"
+                style="width: 150px; margin-top: 10px"
+            />
+            <article style="margin-top: 30px">
+                <h6>
+                    We must verify your account before you can start using
+                    Circles!
+                </h6>
+                <h4>
+                    Please upload a photograph of you holding a utensil above
+                    your head.
+                </h4>
+                <input type="file" id="file" accept="image/*" />
+                <button id="submit">Verify Identity</button>
+            </article>
+        </main>
+        <script>
+            if (localStorage.getItem("verified")) {
+                window.location.href = "/";
+            }
+
+            document.getElementById("submit").addEventListener("click", () => {
+                Swal.fire({
+                    title: "Verifying...",
+                    text: "This should only take a few moments.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                // convert the file to base64
+                const file = document.getElementById("file").files[0];
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+
+                reader.onload = () => {
+                    const base64 = reader.result;
+                    fetch("/user/verify", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ image: base64 }),
+                    })
+                        .then((res) => res.json())
+                        .then((data) => {
+                            if (data.success) {
+                                localStorage.setItem("verified", true);
+                                Swal.fire({
+                                    title: "Verification successful!",
+                                    text: "You can now start using Circles.",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    timer: 1500,
+                                });
+                                window.location.href = "/";
+                            } else {
+                                Swal.fire({
+                                    title: "Verification failed!",
+                                    text: "Please try again. Make sure you are uploading a jpg or png file.",
+                                    icon: "error",
+                                    showConfirmButton: false,
+                                    timer: 1500,
+                                });
+                            }
+                        });
+                };
+            });
+        </script>
+    </body>
+</html>
