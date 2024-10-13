@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <style>
+            :root {
+                --primary: #fec20f;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <img
+                src="/assets/text.png"
+                style="width: 150px; margin-top: 10px"
+            />
+            <article style="margin-top: 30px">
+                <div id="chatMsgContainer">
+                    <div
+                        id="chatTemplate"
+                        style="
+                            background-color: var(--pico-background-color);
+                            padding-top: 40px;
+                            padding-bottom: 10px;
+                            padding-left: 30px;
+                            border-radius: 20px;
+                            display: none;
+                            margin-bottom: 10px;
+                        "
+                    >
+                        <h5 class="uname" style="line-height: 0">Username</h5>
+                        <p class="umsg" style="color: gray">User Message</p>
+                    </div>
+                </div>
+            </article>
+            <input
+                type="text"
+                id="chatMsgInput"
+                placeholder="Type a message..."
+                style="width: 100%"
+            />
+        </main>
+        <script>
+            // get id from query
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get("id");
+            var username = "";
+            var myuid = "";
+
+            function rl() {
+                fetch("/chats/" + id)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        data = data.chat;
+
+                        const chatMsgContainer =
+                            document.getElementById("chatMsgContainer");
+                        const chatTemplate =
+                            document.getElementById("chatTemplate");
+
+                        chatMsgContainer.innerHTML = "";
+
+                        data.messages.forEach((msg) => {
+                            const clone = chatTemplate.cloneNode(true);
+                            const uname = clone.querySelector(".uname");
+                            const umsg = clone.querySelector(".umsg");
+
+                            var msgUser = "";
+
+                            console.log(msg.uid);
+                            console.log(myuid);
+
+                            if (msg.uid === myuid) {
+                                msgUser = username;
+                            } else {
+                                msgUser = data.otherUserNames[0];
+                            }
+
+                            clone.style.display = "block";
+                            uname.textContent = msgUser;
+                            umsg.textContent = msg.message;
+
+                            chatMsgContainer.appendChild(clone);
+                        });
+                    });
+            }
+
+            fetch("/myuser")
+                .then((res) => res.json())
+                .then((data) => {
+                    username = data.user.name;
+                    myuid = data.user.uid;
+
+                    console.log(data);
+
+                    setInterval(() => {
+                        rl();
+                    }, 500);
+                });
+
+            const chatMsgInput = document.getElementById("chatMsgInput");
+            // detect enter key
+            chatMsgInput.addEventListener("keyup", (e) => {
+                if (e.key === "Enter") {
+                    // POST /chats/uid
+                    fetch("/chats/" + id + "/messages", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            id: myuid,
+                            message: chatMsgInput.value,
+                        }),
+                    }).then(() => {
+                        chatMsgInput.value = "";
+                        rl();
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>

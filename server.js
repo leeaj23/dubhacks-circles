@@ -161,6 +161,8 @@ app.get("/chats/:chatid", async (req, res) => {
   try {
     const chatId = req.params.chatid;
 
+    const currentUserUID = req.oidc.user.sub;
+
     // Fetch the chat document by chatId
     const chatRef = doc(db, "chats", chatId);
     const chatSnap = await getDoc(chatRef);
@@ -173,33 +175,90 @@ app.get("/chats/:chatid", async (req, res) => {
 
     const chatData = chatSnap.data();
 
-    // Collect UIDs of users in the chat
-    const userUIDs = chatData.users || [];
+    // Collect UIDs of other users in the chat, excluding the current user
+    const otherUserUIDs = (chatData.users || []).filter(
+      (uid) => uid !== currentUserUID,
+    );
 
-    // Fetch user names
-    const userNamesMap = {};
-    const userPromises = userUIDs.map(async (userUid) => {
-      const userDocRef = doc(db, "users", userUid);
+    // Fetch names of other users
+    const otherUserNames = [];
+    const userPromises = otherUserUIDs.map(async (otherUid) => {
+      const userDocRef = doc(db, "users", otherUid);
       const userDocSnap = await getDoc(userDocRef);
       if (userDocSnap.exists()) {
-        userNamesMap[userUid] = userDocSnap.data().name;
+        otherUserNames.push(userDocSnap.data().name);
       } else {
-        userNamesMap[userUid] = null; // Handle the case where the user document doesn't exist
+        otherUserNames.push(null); // Handle the case where the user document doesn't exist
       }
     });
     await Promise.all(userPromises);
 
-    // Attach the user names to the chat data
-    const chatWithUserNames = {
+    // Prepare the chat data with only the other user's username(s)
+    const chatWithOtherUserNames = {
       id: chatId,
-      ...chatData,
-      userNames: userUIDs.map((uid) => userNamesMap[uid]),
+      messages: chatData.messages,
+      otherUserNames: otherUserNames,
     };
 
     // Send the response
-    res.json({ success: true, chat: chatWithUserNames });
+    res.json({ success: true, chat: chatWithOtherUserNames });
   } catch (error) {
     console.error("Error fetching chat:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.post("/chats/:chatid/messages", requiresAuth(), async (req, res) => {
+  try {
+    const chatId = req.params.chatid;
+    const uid = req.oidc.user.sub; // Authenticated user ID
+    const { message } = req.body; // Message content from the request body
+
+    // Validate message content
+    if (!message) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Message content is required" });
+    }
+
+    // Fetch the chat document from Firestore
+    const chatRef = doc(db, "chats", chatId);
+    const chatSnap = await getDoc(chatRef);
+
+    if (!chatSnap.exists()) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Chat not found" });
+    }
+
+    const chatData = chatSnap.data();
+
+    // Check if the user is a participant in the chat
+    if (!chatData.users.includes(uid)) {
+      return res.status(403).json({
+        success: false,
+        message: "User not a participant in the chat",
+      });
+    }
+
+    // Create a new message object
+    const newMessage = {
+      uid: uid,
+      message: message,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Append the new message to the messages array
+    const updatedMessages = chatData.messages
+      ? [...chatData.messages, newMessage]
+      : [newMessage];
+
+    // Update the chat document in Firestore
+    await setDoc(chatRef, { ...chatData, messages: updatedMessages });
+
+    res.json({ success: true, message: "Message sent", chatId: chatId });
+  } catch (error) {
+    console.error("Error sending message:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -249,36 +308,38 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const usersSnapshot = await getDocs(collection(db, "users"));
     const users = [];
 
     // Populate users array
-    usersSnapshot.forEach(doc => {
+    usersSnapshot.forEach((doc) => {
       users.push({ uid: doc.uid, ...doc.data() });
     });
 
-    const targetUser = users.find(u => u.uid === uid);
+    const targetUser = users.find((u) => u.uid === uid);
     if (!targetUser) {
-      return res.status(404).send('Target user not found');
+      return res.status(404).send("Target user not found");
     }
 
-    const matches = users.filter(user => {
+    const matches = users.filter((user) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
-        (
-          user.schools.some(s => targetUser.schools.includes(s)) || // Match by school
-          user.interests.some(interest => targetUser.interests.includes(interest)) // Match by interests
-        )
+        (user.schools.some((s) => targetUser.schools.includes(s)) || // Match by school
+          user.interests.some((interest) =>
+            targetUser.interests.includes(interest),
+          )) // Match by interests
       );
     });
 
     console.log(matches.length);
 
     // Prepare matched users data
-    const matchedUsers = matches.map(match => ({
+    const matchedUsers = matches.map((match) => ({
       bio: match.bio,
       email: match.email,
       interests: match.interests,
@@ -296,9 +357,8 @@ app.get("/matches", requiresAuth(), async (req, res) => {
 
     // Render the matches page with the matched users
     res.render("matches", { matches: docSnap.data().matches });
-
   } catch (error) {
-    console.error('Error fetching users or updating Firestore:', error);
-    res.status(500).send('Failed to fetch users or update Firestore');
+    console.error("Error fetching users or updating Firestore:", error);
+    res.status(500).send("Failed to fetch users or update Firestore");
   }
 });

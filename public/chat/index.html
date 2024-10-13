@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <style>
+            :root {
+                --primary: #fec20f;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <img
+                src="/assets/text.png"
+                style="width: 150px; margin-top: 10px"
+            />
+            <article style="margin-top: 30px">
+                <h5>Your Chats</h5>
+                <table class="table">
+                    <tbody id="yourChats">
+                        <tr id="chatTemplate" style="display: none">
+                            <td class="name">John Doe</td>
+                            <td class="chat"><a>View Chat</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </main>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const yourChats = document.getElementById("yourChats");
+                const chatTemplate = document.getElementById("chatTemplate");
+
+                fetch("/chats")
+                    .then((res) => res.json())
+                    .then((data) => {
+                        data = data.chats;
+                        data.forEach((chat) => {
+                            const clone = chatTemplate.cloneNode(true);
+                            const name = clone.querySelector(".name");
+                            const chatLink = clone.querySelector("a");
+
+                            clone.style.display = "table-row";
+
+                            if (chat.otherUserNames.length == 0) {
+                                name.textContent = "Empty Chat";
+                            } else {
+                                name.innerHTML =
+                                    '<i class="fa-solid fa-user"></i> ' +
+                                    chat.otherUserNames[0];
+                            }
+                            chatLink.href = `/chat/in?id=${chat.id}`;
+
+                            yourChats.appendChild(clone);
+                        });
+                    });
+            });
+        </script>
+    </body>
+</html>
