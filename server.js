@@ -139,7 +139,7 @@ app.listen(port, () => {
 
 app.get("/matches", requiresAuth(), async (req, res) => {
   var uid = req.oidc.user.sub;
-  const docRef = doc(collection(db, "users"), uid);
+  const docRef = doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
@@ -164,20 +164,25 @@ app.get("/matches", requiresAuth(), async (req, res) => {
            user.interests.some(interest => targetUser.interests.includes(interest))) // Match by interests
         );
       });
+
+      console.log(matches.length);
   
       // Store matches in an array
       const matchedUsers = matches.map(match => ({
-        uid: match.uid,
-        name: match.name,
-        schools: match.schools,
+        bio: match.bio,
+        email: match.email,
         interests: match.interests,
         matches: match.matches,
-        bio: match.bio,
+        name: match.name,
+        schools: match.schools,
+        uid: match.uid,
       }));
+      const user = docSnap.data();
+      user.matches = matchedUsers;
   
       // Update the target user's document in Firestore
-      setDoc(docRef, docSnap.data()).then(() => {
-        res.json({ success: true, matches: matchedUsers });
+      setDoc(docRef, user).then(() => {
+        res.json({ success: true, user: user });
       });
 
     } catch (error) {
