@@ -78,6 +78,26 @@ app.post("/profile/edit", requiresAuth(), async (req, res) => {
   }
 });
 
+app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
+  const { duid } = req.params; // Destination user ID
+  const { uid } = req.body; // Source user ID
+
+  // create a new chat between the two users
+  const chat = {
+    messages: [],
+    users: [uid, duid],
+  };
+
+  const chatRef = collection(db, "chats");
+  const newChat = setDoc(chatRef, chat)
+    .then(() => {
+      res.json({ success: true, chat: chat });
+    })
+    .catch((error) => {
+      res.status(500).json({ success: false, message: error });
+    });
+});
+
 app.get("/isauthed", (req, res) => {
   if (req.oidc.isAuthenticated()) {
     res.json({ isAuthed: req.oidc.isAuthenticated(), uid: req.oidc.user.sub });

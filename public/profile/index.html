@@ -27,12 +27,9 @@
                 <ul>
                     <li>
                         <a href="/"
-                            ><img src="../assets/icon.png" style="width: 150px"
-                        /></a>
-                    </li>
-                    <li>
-                        <a href="/"
-                            ><img src="../assets/text.png" style="width: 150px"
+                            ><img
+                                src="/assets/circlesbs.png"
+                                style="width: 200px"
                         /></a>
                     </li>
                 </ul>
@@ -127,6 +124,10 @@
               <li><a href="/profile/me">Your Profile</a></li>
               <li><a href="/logout">Logout</a></li>
             `;
+                        if (data.uid == id) {
+                            // redirect to /profile/me
+                            window.location.href = "/profile/me";
+                        }
                     }
                 });
 
@@ -182,7 +183,7 @@
                             data.name;
                         if (data.schools.length > 0) {
                             document.getElementById("lastSchool").innerText =
-                                data.schools[data.schools.length - 1].name;
+                                data.schools[data.schools.length - 1];
                         } else {
                             document.getElementById("lastSchool").innerHTML =
                                 "<i>No schools provided</i>";
