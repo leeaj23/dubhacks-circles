@@ -361,8 +361,11 @@ app.get("/matches", requiresAuth(), async (req, res) => {
       await setDoc(docRef, { ...docSnap.data(), matches: [] });
     }
 
+    const updatedDocSnap = await getDoc(docRef);
+    const updatedMatches = updatedDocSnap.data().matches || [];
+
     // Render the matches page with the matched users
-    res.render("matches", { matches: docSnap.data().matches });
+    res.render("matches", { matches: updatedMatches });
   } catch (error) {
     console.error("Error fetching users or updating Firestore:", error);
     res.status(500).send("Failed to fetch users or update Firestore");
