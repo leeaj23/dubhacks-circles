@@ -79,6 +79,15 @@
                     .then((res) => res.json())
                     .then((data) => {
                         data = data.chats;
+
+                        if (data.length == 0) {
+                            const p = document.createElement("p");
+                            p.innerHTML =
+                                "No chats found! Match with some people first <a href='/matches'>here</a>";
+                            yourChats.appendChild(p);
+                            return;
+                        }
+
                         data.forEach((chat) => {
                             const clone = chatTemplate.cloneNode(true);
                             const name = clone.querySelector(".name");
