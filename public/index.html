@@ -15,7 +15,7 @@
             }
 
             header {
-                background-color: #fec20f;
+                background-color: black;
                 color: white;
                 padding: 20px 0;
                 text-align: center;
@@ -174,7 +174,7 @@
     </head>
 
     <body>
-        <header>
+        <header id="top1">
             <img
                 src="assets/circlesbs.png"
                 alt="Circles Logo"
@@ -182,11 +182,11 @@
             />
         </header>
 
-        <nav>
-            <a href="#about">About Us</a>
-            <a href="#features">Features</a>
-            <a href="#sign-up">Sign Up</a>
-            <a href="#login">Login</a>
+        <nav id="nav">
+            <a href="#top1">Home</a>
+            <a href="#mid1">Features</a>
+            <a href="/login">Sign Up</a>
+            <a href="/login">Login</a>
         </nav>
 
         <!-- Parallax Section -->
@@ -198,8 +198,9 @@
                     Circles. Your match is just a click away.
                 </p>
                 <button
+                    id="pf"
                     class="cta-button"
-                    onclick="window.location.href='#sign-up'"
+                    onclick="window.location.href='/profile/me'"
                 >
                     Join Now
                 </button>
@@ -207,7 +208,7 @@
         </section>
 
         <!-- Content Section -->
-        <section class="content">
+        <section class="content" id="mid1">
             <h2>Why Circles?</h2>
             <p>
                 Our platform offers unique features to help you find your
@@ -280,5 +281,18 @@
                 <a href="#privacy">Privacy Policy</a>
             </p>
         </footer>
+
+        <script>
+            fetch("/isauthed")
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.isAuthed) {
+                        document.getElementById("pf").innerHTML =
+                            "Your Profile";
+                        document.querySelector("nav").innerHTML =
+                            `<a href="/matches">Matches</a><a href="/profile/me">Your Profile</a><a href="/logout">Logout</a>`;
+                    }
+                });
+        </script>
     </body>
 </html>

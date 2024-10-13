@@ -10,6 +10,8 @@ const {
   getDoc,
   doc,
   setDoc,
+  query,
+  where,
   getDocs,
 } = require("firebase/firestore");
 
@@ -97,6 +99,27 @@ app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
     });
+});
+
+app.get("/chats", requiresAuth(), async (req, res) => {
+  try {
+    const uid = req.oidc.user.sub;
+    const chatsRef = collection(db, "chats");
+
+    // Construct the query with the where clause
+    const q = query(chatsRef, where("users", "array-contains", uid));
+
+    // Execute the query
+    const querySnapshot = await getDocs(q);
+
+    // Process the results
+    const chatList = querySnapshot.docs.map((doc) => doc.data());
+
+    // Send the response
+    res.json({ success: true, chats: chatList });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 app.get("/isauthed", (req, res) => {
