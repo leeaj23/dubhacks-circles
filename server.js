@@ -85,20 +85,41 @@ app.post("/profile/edit", requiresAuth(), async (req, res) => {
 app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
   const duid = req.params.destuser; // Destination user ID
   const uid = req.oidc.user.sub; // Source user ID
+  const interestSchools = req.body.interestSchools;
 
-  // Create a new chat between the two users
-  const chat = {
-    messages: [],
-    users: [uid, duid],
-  };
+  // convert interestSchools to be url encoded
+  const urlEncodedInterests = interestSchools
+    .map((interest) => encodeURIComponent(interest))
+    .join(",");
 
-  const chatRef = collection(db, "chats");
-  try {
-    const newChatDoc = await addDoc(chatRef, chat);
-    res.json({ success: true, chat: chat, chatId: newChatDoc.id });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  fetch(
+    "https://circlesapp.snkdev.workers.dev/?interests=" + urlEncodedInterests,
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      var datePrompt = data[0].response.response;
+
+      // Create a new chat between the two users
+      const chat = {
+        messages: [],
+        users: [uid, duid],
+        prompt: datePrompt,
+      };
+
+      const chatRef = collection(db, "chats");
+      try {
+        addDoc(chatRef, chat).then((newChatDoc) => {
+          res.json({
+            success: true,
+            chat: chat,
+            chatId: newChatDoc.id,
+            prompt: datePrompt,
+          });
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
 });
 
 app.get("/chats", requiresAuth(), async (req, res) => {
@@ -180,6 +201,8 @@ app.get("/chats/:chatid", async (req, res) => {
       (uid) => uid !== currentUserUID,
     );
 
+    var prompt = chatData.prompt;
+
     // Fetch names of other users
     const otherUserNames = [];
     const userPromises = otherUserUIDs.map(async (otherUid) => {
@@ -198,6 +221,7 @@ app.get("/chats/:chatid", async (req, res) => {
       id: chatId,
       messages: chatData.messages,
       otherUserNames: otherUserNames,
+      prompt: prompt,
     };
 
     // Send the response
@@ -335,10 +359,11 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     const matches = users.filter((user) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
-        (
-          user.schools.filter(x => targetUser.schools.includes(x)).length + 
-          user.interests.filter(x => targetUser.interests.includes(x)).length * 2 >= 3
-        )
+        user.schools.filter((x) => targetUser.schools.includes(x)).length +
+          user.interests.filter((x) => targetUser.interests.includes(x))
+            .length *
+            2 >=
+          3
       );
     });
 
@@ -350,7 +375,7 @@ app.get("/matches", requiresAuth(), async (req, res) => {
       interests: match.interests,
       name: match.name,
       schools: match.schools,
-      uid: match.uid, 
+      uid: match.uid,
     }));
 
     console.log(matchedUsers);

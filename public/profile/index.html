@@ -113,6 +113,7 @@
             if (!id) {
                 window.location.href = "/";
             }
+            var shared;
 
             fetch("/isauthed")
                 .then((res) => res.json())
@@ -133,12 +134,18 @@
                             .getElementById("chat")
                             .addEventListener("click", () => {
                                 document.getElementById("chat").ariaBusy = true;
+                                document.getElementById("chat").innerText =
+                                    "Preparing Chat...";
+                                document.getElementById("chat").disabled = true;
                                 fetch("/chats/" + id, {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
                                     },
-                                    body: JSON.stringify({ uid: data.uid }),
+                                    body: JSON.stringify({
+                                        uid: data.uid,
+                                        interestSchools: shared,
+                                    }),
                                 })
                                     .then((res) => res.json())
                                     .then((data) => {
@@ -167,7 +174,7 @@
                         document.getElementById("pfp").src = data.picture;
 
                         try {
-                            var shared = [];
+                            shared = [];
                             fetch("/myuser")
                                 .then((res) => res.json())
                                 .then((curr) => {
