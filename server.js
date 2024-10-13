@@ -18,8 +18,7 @@ const {
 const { OpenAI } = require("openai");
 
 const client = new OpenAI({
-  apiKey:
-    "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",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 app.set("view engine", "ejs");
