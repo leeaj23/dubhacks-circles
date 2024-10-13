@@ -64,18 +64,16 @@
                     "
                 >
                     <button
-                        id="connect"
+                        id="chat"
                         style="
                             background-color: #fec20f;
                             color: black;
                             outline: none;
+                            margin-right: 20px;
                         "
                         class="primary"
                     >
-                        <i class="fa-solid fa-user-group"></i> Connect
-                    </button>
-                    <button id="follow" class="outline secondary">
-                        <i class="fa-solid fa-circle-plus"></i> Follow
+                        <i class="fa-solid fa-comment"></i> Chat
                     </button>
                 </div>
                 <hr />
@@ -130,6 +128,26 @@
                             // redirect to /profile/me
                             window.location.href = "/profile/me";
                         }
+
+                        document
+                            .getElementById("chat")
+                            .addEventListener("click", () => {
+                                document.getElementById("chat").ariaBusy = true;
+                                fetch("/chats/" + id, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ uid: data.uid }),
+                                })
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                        if (data.success) {
+                                            window.location.href =
+                                                "/chat/in?id=" + data.chatId;
+                                        }
+                                    });
+                            });
                     }
                 });
 
@@ -155,11 +173,17 @@
                                 .then((curr) => {
                                     if (curr.success) {
                                         curr = curr.user;
-                                        shared = shared.concat(curr.interests.filter(x => data.interests.includes(x)));
-                                        shared = shared.concat(curr.schools.filter(x => data.schools.includes(x)));
-                                        if (
-                                            shared.length == 0
-                                        ) {
+                                        shared = shared.concat(
+                                            curr.interests.filter((x) =>
+                                                data.interests.includes(x),
+                                            ),
+                                        );
+                                        shared = shared.concat(
+                                            curr.schools.filter((x) =>
+                                                data.schools.includes(x),
+                                            ),
+                                        );
+                                        if (shared.length == 0) {
                                             document.getElementById(
                                                 "inCommonTitle",
                                             ).innerText =
@@ -182,7 +206,8 @@
                                             shared.forEach((item) => {
                                                 document.getElementById(
                                                     "inCommonList",
-                                                ).innerHTML += "<li>" + item + "</li>";
+                                                ).innerHTML +=
+                                                    "<li>" + item + "</li>";
                                             });
                                         }
                                     }
