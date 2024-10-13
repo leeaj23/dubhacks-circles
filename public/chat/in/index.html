@@ -100,6 +100,11 @@
 
                         var it = 0;
 
+                        const p = document.createElement("p");
+                        p.id = "noMsg";
+                        p.textContent = data.prompt;
+                        chatMsgContainer.appendChild(p);
+
                         data.messages.forEach((msg) => {
                             it += 1;
 
@@ -108,9 +113,6 @@
                             const umsg = clone.querySelector(".umsg");
 
                             var msgUser = "";
-
-                            console.log(msg.uid);
-                            console.log(myuid);
 
                             if (msg.uid === myuid) {
                                 msgUser = username;
@@ -130,19 +132,18 @@
                             chatMsgContainer.appendChild(clone);
                         });
 
+                        /*
+                        if (it === 0) {
+                            const p = document.createElement("p");
+                            p.id = "noMsg";
+                            p.textContent = data.prompt;
+                            chatMsgContainer.appendChild(p);
+                        }
+                        */
+
                         if (!hasLoaded) {
                             scrollToBottomWithSmoothScroll();
                             hasLoaded = true;
-                        }
-
-                        if (it == 0) {
-                            const p = document.createElement("p");
-                            p.id = "noMsg";
-                            p.textContent =
-                                "No messages yet, send one to start chatting with " +
-                                data.otherUserNames[0] +
-                                "!";
-                            chatMsgContainer.appendChild(p);
                         }
                     });
             }
@@ -171,10 +172,6 @@
                     clone.style.display = "block";
                     uname.textContent = username;
                     umsg.textContent = chatMsgInput.value;
-
-                    if (document.getElementById("noMsg")) {
-                        document.getElementById("noMsg").remove();
-                    }
 
                     chatMsgContainer.appendChild(clone);
                     var input = chatMsgInput.value;
