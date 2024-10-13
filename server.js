@@ -15,6 +15,8 @@ const {
   getDocs,
   addDoc,
 } = require("firebase/firestore");
+const axios = require('axios');
+
 
 app.set("view engine", "ejs");
 
@@ -401,31 +403,23 @@ app.get("/suggestion/:location", requiresAuth(), async (req, res) => {
   const location = req.params.location;
 
   try {
-    // API call to fetch suggestions based on location
-    const apiKey = "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"; // Replace with your actual API key
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=activities+in+${encodeURIComponent(
-      location,
-    )}&key=${apiKey}`;
+    const prompt = `Can you suggest some fun date ideas near ${location}?`;
 
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+    // Set up your Perplexity API request (replace with actual API details)
+    const response = await axios.post('https://api.perplexity.ai/completions', {
+      prompt: prompt,
+      // Assuming the API requires an API key or other authentication
+      headers: {
+        'Authorization': `Bearer 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`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-    if (data.results && data.results.length > 0) {
-      const suggestions = data.results.map((result) => ({
-        name: result.name,
-        address: result.formatted_address,
-        rating: result.rating,
-      }));
-
-      res.json({ success: true, suggestions: suggestions });
-    } else {
-      res.json({
-        success: false,
-        message: "No suggestions found for the given location.",
-      });
-    }
+    // Extract and send the response back to the client
+    const dateIdeas = response.data.ideas; // adjust according to actual API response structure
+    res.json({ dateIdeas });
   } catch (error) {
-    console.error("Error fetching suggestions:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch suggestions." });
+    console.error('Error fetching date ideas:', error);
+    res.status(500).send('Internal Server Error');
   }
 })
