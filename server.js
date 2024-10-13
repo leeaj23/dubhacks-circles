@@ -329,25 +329,13 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     const matches = users.filter((user) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
-        (user.schools.some((s) => targetUser.schools.includes(s)) || // Match by school
-          user.interests.some((interest) =>
-            targetUser.interests.includes(interest),
-          )) // Match by interests
+
+        (
+          user.schools.filter(x => targetUser.schools.includes(x)).length + 
+          user.interests.filter(x => targetUser.interests.includes(x)).length * 2 >= 3
+        )
       );
     });
-
-    console.log(matches.length);
-
-    // Prepare matched users data
-    const matchedUsers = matches.map((match) => ({
-      bio: match.bio,
-      email: match.email,
-      interests: match.interests,
-      matches: match.matches || [],
-      name: match.name,
-      schools: match.schools,
-      uid: match.uid, // Use match.id if uid is not present
-    }));
 
     console.log(matches);
 

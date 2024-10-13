@@ -148,32 +148,44 @@
                         document.getElementById("pfp").src = data.picture;
 
                         try {
-                            if (
-                                data.inCommon != null &&
-                                data.inCommon.length == 0
-                            ) {
-                                document.getElementById(
-                                    "inCommonTitle",
-                                ).innerText =
-                                    "You and " +
-                                    data.name +
-                                    " have nothing in common";
-                            } else {
-                                document.getElementById(
-                                    "inCommonTitle",
-                                ).innerText =
-                                    "You and " +
-                                    data.name +
-                                    " have some things in common:";
-                                document.getElementById(
-                                    "inCommonList",
-                                ).innerHTML = "";
-                                data.inCommon.forEach((item) => {
-                                    document.getElementById(
-                                        "inCommonList",
-                                    ).innerHTML += "<li>" + item + "</li>";
+                            var shared = [];
+                            fetch("/myuser")
+                                .then((res) => res.json())
+                                .then((curr) => {
+                                    if (curr.success) {
+                                        curr = curr.user;
+                                        shared = shared.concat(curr.interests.filter(x => data.interests.includes(x)));
+                                        shared = shared.concat(curr.schools.filter(x => data.schools.includes(x)));
+                                        if (
+                                            shared.length == 0
+                                        ) {
+                                            document.getElementById(
+                                                "inCommonTitle",
+                                            ).innerText =
+                                                "You and " +
+                                                data.name +
+                                                " have nothing in common";
+                                            document.getElementById(
+                                                "inCommonList",
+                                            ).innerHTML = "";
+                                        } else {
+                                            document.getElementById(
+                                                "inCommonTitle",
+                                            ).innerText =
+                                                "You and " +
+                                                data.name +
+                                                " have some things in common:";
+                                            document.getElementById(
+                                                "inCommonList",
+                                            ).innerHTML = "";
+                                            shared.forEach((item) => {
+                                                document.getElementById(
+                                                    "inCommonList",
+                                                ).innerHTML += "<li>" + item + "</li>";
+                                            });
+                                        }
+                                    }
                                 });
-                            }
                         } catch (e) {
                             console.log(e);
                             document.getElementById("inCommonTitle").innerText =
