@@ -269,8 +269,8 @@ app.get("/matches", requiresAuth(), async (req, res) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
         (
-          user.schools.some(s => targetUser.schools.includes(s)) || // Match by school
-          user.interests.some(interest => targetUser.interests.includes(interest)) // Match by interests
+          user.schools.filter(x => targetUser.schools.includes(x)).length + 
+          user.interests.filter(x => targetUser.interests.includes(x)).length * 2 >= 5
         )
       );
     });
