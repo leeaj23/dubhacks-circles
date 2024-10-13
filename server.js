@@ -104,20 +104,102 @@ app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
 app.get("/chats", requiresAuth(), async (req, res) => {
   try {
     const uid = req.oidc.user.sub;
+
+    // Fetch chats that include the current user
     const chatsRef = collection(db, "chats");
-
-    // Construct the query with the where clause
     const q = query(chatsRef, where("users", "array-contains", uid));
-
-    // Execute the query
     const querySnapshot = await getDocs(q);
 
-    // Process the results
-    const chatList = querySnapshot.docs.map((doc) => doc.data());
+    // Map chats to an array of objects
+    const chats = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Collect UIDs of other users
+    const otherUserUIDsSet = new Set();
+    chats.forEach((chat) => {
+      chat.users
+        .filter((userUid) => userUid !== uid)
+        .forEach((otherUid) => otherUserUIDsSet.add(otherUid));
+    });
+    const otherUserUIDs = Array.from(otherUserUIDsSet);
+
+    // Fetch other users' names
+    const otherUserNamesMap = {};
+    const userPromises = otherUserUIDs.map(async (otherUid) => {
+      const userDocRef = doc(db, "users", otherUid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        otherUserNamesMap[otherUid] = userDocSnap.data().name;
+      } else {
+        otherUserNamesMap[otherUid] = null; // User not found
+      }
+    });
+    await Promise.all(userPromises);
+
+    // Attach the other users' names to each chat
+    const chatsWithNames = chats.map((chat) => {
+      const otherUserUIDs = chat.users.filter((userUid) => userUid !== uid);
+      const otherUserNames = otherUserUIDs.map(
+        (otherUid) => otherUserNamesMap[otherUid],
+      );
+      return {
+        ...chat,
+        otherUserNames: otherUserNames,
+      };
+    });
+
+    res.json({ success: true, chats: chatsWithNames });
+  } catch (error) {
+    console.error("Error fetching chats:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get("/chats/:chatid", async (req, res) => {
+  try {
+    const chatId = req.params.chatid;
+
+    // Fetch the chat document by chatId
+    const chatRef = doc(db, "chats", chatId);
+    const chatSnap = await getDoc(chatRef);
+
+    if (!chatSnap.exists()) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Chat not found" });
+    }
+
+    const chatData = chatSnap.data();
+
+    // Collect UIDs of users in the chat
+    const userUIDs = chatData.users || [];
+
+    // Fetch user names
+    const userNamesMap = {};
+    const userPromises = userUIDs.map(async (userUid) => {
+      const userDocRef = doc(db, "users", userUid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        userNamesMap[userUid] = userDocSnap.data().name;
+      } else {
+        userNamesMap[userUid] = null; // Handle the case where the user document doesn't exist
+      }
+    });
+    await Promise.all(userPromises);
+
+    // Attach the user names to the chat data
+    const chatWithUserNames = {
+      id: chatId,
+      ...chatData,
+      userNames: userUIDs.map((uid) => userNamesMap[uid]),
+    };
 
     // Send the response
-    res.json({ success: true, chats: chatList });
+    res.json({ success: true, chat: chatWithUserNames });
   } catch (error) {
+    console.error("Error fetching chat:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
