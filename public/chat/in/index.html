@@ -20,6 +20,16 @@
                 --primary: #fec20f;
             }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.3/dist/sweetalert2.all.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.3/dist/sweetalert2.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet/dist/leaflet.css"
+        />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     </head>
     <body>
         <main class="container">
@@ -89,6 +99,7 @@
             const chatTemplate = document.getElementById("chatTemplate");
 
             var hasLoaded = false;
+            var modalShown = false;
 
             function rl() {
                 fetch("/chats/" + id)
@@ -131,6 +142,101 @@
 
                             chatMsgContainer.appendChild(clone);
                         });
+
+                        if (it >= 6 && !modalShown) {
+                            modalShown = true;
+                            // JavaScript code to create the modal with the map
+                            Swal.fire({
+                                title: "Want to make date ideas?",
+                                html: '<p>Select a location to meet!</p><div id="map" style="width: 100%; height: 300px;"></div>',
+                                showCancelButton: true,
+                                confirmButtonText: "Create",
+                                cancelButtonText: "Not Now",
+                                didOpen: () => {
+                                    // Initialize the map inside the modal
+                                    var map = L.map("map").setView([20, 0], 2); // Center the map at a global view
+
+                                    // Add OpenStreetMap tiles
+                                    L.tileLayer(
+                                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                        {
+                                            attribution:
+                                                "© OpenStreetMap contributors",
+                                        },
+                                    ).addTo(map);
+
+                                    var marker;
+
+                                    // Function to handle map clicks
+                                    function onMapClick(e) {
+                                        if (marker) {
+                                            map.removeLayer(marker);
+                                        }
+                                        marker = L.marker(e.latlng).addTo(map);
+                                        // Store the selected coordinates
+                                        Swal.selectedLatLng = e.latlng;
+                                    }
+
+                                    map.on("click", onMapClick);
+                                },
+                                preConfirm: () => {
+                                    // Validate that a location has been selected
+                                    if (!Swal.selectedLatLng) {
+                                        Swal.showValidationMessage(
+                                            "Please select a location on the map.",
+                                        );
+                                        return false;
+                                    }
+                                    // Return the selected coordinates
+                                    return Swal.selectedLatLng;
+                                },
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    var latlng = result.value;
+                                    var lat = latlng.lat;
+                                    var lng = latlng.lng;
+
+                                    // Use Nominatim Reverse Geocoding API to find the nearest city
+                                    fetch(
+                                        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+                                    )
+                                        .then((response) => response.json())
+                                        .then((data) => {
+                                            var city =
+                                                data.address.city ||
+                                                data.address.town ||
+                                                data.address.village ||
+                                                data.address.hamlet ||
+                                                "Unknown location";
+
+                                            Swal.fire({
+                                                title: "Creating...",
+                                                text: "We are creating the perfect date idea for you. Please wait.",
+                                                allowOutsideClick: false,
+                                                didOpen: () => {
+                                                    Swal.showLoading();
+                                                },
+                                            });
+                                        })
+                                        .catch((err) => {
+                                            Swal.fire(
+                                                "Error",
+                                                "Failed to get the nearest city.",
+                                                "error",
+                                            );
+                                        });
+                                } else if (
+                                    result.dismiss === Swal.DismissReason.cancel
+                                ) {
+                                    // Handle 'Not Now' button click
+                                    Swal.fire(
+                                        "Cancelled",
+                                        "You cancelled the operation.",
+                                        "info",
+                                    );
+                                }
+                            });
+                        }
 
                         /*
                         if (it === 0) {
