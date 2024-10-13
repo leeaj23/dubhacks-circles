@@ -335,7 +335,6 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     const matches = users.filter((user) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
-
         (
           user.schools.filter(x => targetUser.schools.includes(x)).length + 
           user.interests.filter(x => targetUser.interests.includes(x)).length * 2 >= 3
@@ -345,8 +344,21 @@ app.get("/matches", requiresAuth(), async (req, res) => {
 
     console.log(matches);
 
-    if (matches != undefined) {
-      await setDoc(docRef, { ...docSnap.data(), matches: matches });
+    const matchedUsers = matches.map((match) => ({
+      bio: match.bio,
+      email: match.email,
+      interests: match.interests,
+      name: match.name,
+      schools: match.schools,
+      uid: match.uid, 
+    }));
+
+    console.log(matchedUsers);
+
+    if (matchedUsers != undefined) {
+      await setDoc(docRef, { ...docSnap.data(), matches: matchedUsers });
+    } else {
+      await setDoc(docRef, { ...docSnap.data(), matches: [] });
     }
 
     // Render the matches page with the matched users
