@@ -51,6 +51,9 @@
               <li><a href="/profile/me">Your Profile</a></li>
               <li><a href="/logout">Logout</a></li>
                 `;
+                if (localStorage.getItem("verified") != "true") {
+                window.location.href = "/verify";
+            }
                     }
                 });
         </script>

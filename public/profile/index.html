@@ -113,6 +113,8 @@
             }
             var shared;
 
+            // check if localstorage has verified = true
+
             fetch("/isauthed")
                 .then((res) => res.json())
                 .then((data) => {
@@ -128,6 +130,9 @@
                             window.location.href = "/profile/me";
                         }
 
+                        if (localStorage.getItem("verified") != "true") {
+                            window.location.href = "/verify";
+                        }
                         document
                             .getElementById("chat")
                             .addEventListener("click", () => {

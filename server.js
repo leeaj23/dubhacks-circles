@@ -15,8 +15,11 @@ const {
   getDocs,
   addDoc,
 } = require("firebase/firestore");
-const axios = require('axios');
+const { OpenAI } = require("openai");
 
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.set("view engine", "ejs");
 
@@ -46,7 +49,12 @@ const config = {
 
 app.use(auth(config));
 app.use(express.static("public"));
-app.use(bodyParser.json());
+app.use(
+  bodyParser.json({
+    limit: "50mb",
+  }),
+);
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
@@ -121,6 +129,44 @@ app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
       } catch (error) {
         res.status(500).json({ success: false, message: error.message });
       }
+    });
+});
+
+app.post("/user/verify", requiresAuth(), async (req, res) => {
+  const uid = req.oidc.user.sub;
+  const userImage = req.body.image;
+
+  const base64Image = userImage.replace(/^data:image\/jpeg;base64,/, "");
+
+  client.chat.completions
+    .create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content:
+            'Return a json document in the following format: {"verified": Boolean} Where Boolean is true if the user is holding a utensil above their head, and false if they aren’t.',
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: "data:image/jpeg;base64," + base64Image,
+              },
+            },
+          ],
+        },
+      ],
+    })
+    .then((response) => {
+      const completion = response.choices[0].message.content;
+      var jsonParsed = JSON.parse(completion);
+      res.json({ success: jsonParsed.verified });
+    })
+    .catch((error) => {
+      res.json({ success: false });
     });
 });
 
@@ -407,20 +453,33 @@ app.get("/suggestion/:location", requiresAuth(), async (req, res) => {
     const prompt = `Can you suggest some fun date ideas near ${location}?`;
 
     // Set up your Perplexity API request (replace with actual API details)
-    const response = await axios.post('https://api.perplexity.ai/completions', {
-      prompt: prompt,
-      // Assuming the API requires an API key or other authentication
+    const response = await fetch("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer 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`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer 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`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are suggesting date ideas for a couple which just met. Only include the list of locations, not any text before the list.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "llama-3.1-sonar-small-128k-online",
+      }),
     });
 
-    // Extract and send the response back to the client
-    const dateIdeas = response.data.ideas; // adjust according to actual API response structure
-    res.json({ dateIdeas });
+    const responseData = await response.json();
+
+    res.json({ response: responseData.choices[0].message.content });
   } catch (error) {
-    console.error('Error fetching date ideas:', error);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching date ideas:", error);
+    res.status(500).send("Internal Server Error");
   }
-})
+});
