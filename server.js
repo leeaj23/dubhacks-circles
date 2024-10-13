@@ -102,6 +102,46 @@ app.get("/matches", requiresAuth(), async (req, res) => {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
+    try {
+      const usersSnapshot = await db.collection('users').get();
+      const users = [];
+
+      // Populate users array
+      usersSnapshot.forEach(doc => {
+        users.push({ id: doc.id, ...doc.data() });
+      });
+
+      const targetUser = users.find(u => u.id === uid);
+      if (!targetUser) {
+        return res.status(404).send('Target user not found');
+      }
+
+      const matches = users.filter(user => {
+        return (
+          user.id !== targetUserId && // Exclude the target user
+          (user.school === targetUser.school || // Match by school
+           user.interests.some(interest => targetUser.interests.includes(interest))) // Match by interests
+        );
+      });
+  
+      // Store matches in an array
+      const matchedUsers = matches.map(match => ({
+        uid: match.uid,
+        name: match.name,
+        school: match.school,
+        interests: match.interests,
+        matches: match.matches,
+        bio: match.bio,
+      }));
+  
+      // Update the target user's document in Firestore
+      await db.collection('users').doc(targetUserId).update({
+        matches: matchedUsers  // Store the matches array in a field called 'matches'
+      });
+    } catch (error) {
+      console.error('Error fetching users or updating Firestore:', error);
+      res.status(500).send('Failed to fetch users or update Firestore');
+    }
     const matches = docSnap.data().matches;
     console.log(matches);
     res.render('matches', {'matches': matches});
