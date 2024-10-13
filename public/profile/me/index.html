@@ -70,14 +70,55 @@
                         display: inline-block;
                         vertical-align: top;
                         margin-right: 50px;
+                        width: 100%;
                     "
                 >
                     <p id="bio" style="font-size: 26px">
                         Hey there! I'm John Doe, a high school student from WA.
                     </p>
-                    <button id="editProfile" class="contrast">
-                        Edit Profile
-                    </button>
+                    <div id='thing' style="width: 100%; display:flex;">
+                        <div
+                            style="
+                                flex:1;
+                                padding-left: 50px;
+                                width: 100%;
+                                border-left: 1px solid grey;
+                            "
+                        >
+                            <p id="schoolTitle" style="color: rgb(150, 150, 150)">
+                                Your Schools
+                            </p>
+                            <ul id="schoolList" style="color: rgb(125, 125, 125)">
+                                <li>Nothing</li>
+                                <li>Nothing</li>
+                                <li>Nothing</li>
+                            </ul>
+                        </div>
+                        <div
+                            style="
+                                flex:1;
+                                width: 100%;
+                                padding-left: 50px;
+                                border-left: 1px solid grey;
+                                border-right: 1px solid grey;
+                            "
+                        >
+                            <p id="interestTitle" style="color: rgb(150, 150, 150)">
+                                Your Interests
+                            </p>
+                            <ul id="interestList" style="color: rgb(125, 125, 125)">
+                                <li>Nothing</li>
+                                <li>Nothing</li>
+                                <li>Nothing</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button id="editProfile" class="contrast">
+                            Edit Profile
+                        </button>
+                    </div>
                 </div>
             </article>
         </main>
@@ -131,6 +172,23 @@
                                         ).innerHTML =
                                             "<i>No schools provided</i>";
                                     }
+
+                                    if (data.schools.length > 0) { 
+                                        document.getElementById("schoolList").innerHTML = '';
+                                        data.schools.forEach((item) => {
+                                                document.getElementById(
+                                                    "schoolList",
+                                                ).innerHTML += "<li>" + item + "</li>";
+                                            });
+                                    }
+                                    if (data.interests.length > 0) { 
+                                        document.getElementById("interestList").innerHTML = '';
+                                        data.interests.forEach((item) => {
+                                                document.getElementById(
+                                                    "interestList",
+                                                ).innerHTML += "<li>" + item + "</li>";
+                                            });
+                                    }
                                     // Store user data for later use
                                     window.userData = data;
                                 } else {
@@ -161,6 +219,7 @@
             });
 
             function enterEditMode() {
+                document.getElementById('thing').style = 'display: none';
                 // Replace bio with textarea
                 var bioElement = document.getElementById("bio");
                 var bioText = bioElement.innerText;
@@ -300,6 +359,7 @@
             }
 
             function saveProfile() {
+                document.getElementById('thing').style = 'display: flex';
                 // Get updated bio
                 var updatedBio = document.getElementById("bioTextarea").value;
 
@@ -323,6 +383,23 @@
                         updatedSchools.push(input.value.trim());
                     }
                 });
+
+                if (updatedSchools.length > 0) { 
+                    document.getElementById("schoolList").innerHTML = '';
+                    updatedSchools.forEach((item) => {
+                            document.getElementById(
+                                "schoolList",
+                            ).innerHTML += "<li>" + item + "</li>";
+                        });
+                }
+                if (updatedInterests.length > 0) { 
+                    document.getElementById("interestList").innerHTML = '';
+                    updatedInterests.forEach((item) => {
+                            document.getElementById(
+                                "interestList",
+                            ).innerHTML += "<li>" + item + "</li>";
+                        });
+                }
 
                 // Replace textarea with paragraph
                 var bioParagraph = document.createElement("p");
