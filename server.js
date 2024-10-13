@@ -193,19 +193,6 @@ app.get("/matches", requiresAuth(), async (req, res) => {
       );
     });
 
-    console.log(matches.length);
-
-    // Prepare matched users data
-    const matchedUsers = matches.map(match => ({
-      bio: match.bio,
-      email: match.email,
-      interests: match.interests,
-      matches: match.matches || [],
-      name: match.name,
-      schools: match.schools,
-      uid: match.uid, // Use match.id if uid is not present
-    }));
-
     console.log(matches);
 
     if (matches != undefined) {
