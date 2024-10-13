@@ -112,6 +112,7 @@
             }
 
             .feature-card {
+                margin-right: 10px;
                 background-color: #fff;
                 border: 2px solid #fec20f;
                 border-radius: 10px;
@@ -142,7 +143,8 @@
                 position: absolute;
                 top: 100%;
                 left: 0;
-                width: 100%;
+                width: 90%;
+                height: 100%;
                 background-color: #fec20f;
                 color: white;
                 padding: 20px;
@@ -174,7 +176,7 @@
     </head>
 
     <body>
-        <header>
+        <header id="top1">
             <img
                 src="assets/circlesbs.png"
                 alt="Circles Logo"
@@ -182,11 +184,11 @@
             />
         </header>
 
-        <nav>
-            <a href="#about">About Us</a>
-            <a href="#features">Features</a>
-            <a href="#sign-up">Sign Up</a>
-            <a href="#login">Login</a>
+        <nav id="nav">
+            <a href="#top1">Home</a>
+            <a href="#mid1">Features</a>
+            <a href="/login">Sign Up</a>
+            <a href="/login">Login</a>
         </nav>
 
         <!-- Parallax Section -->
@@ -198,6 +200,7 @@
                     Circles. Your match is just a click away.
                 </p>
                 <button
+                    id="pf"
                     class="cta-button"
                     onclick="window.location.href='#sign-up'"
                 >
@@ -215,7 +218,7 @@
             </p>
 
             <!-- Features Section -->
-            <div class="features-section">
+            <div class="features-section" id="mid1">
                 <!-- Card 1: Shallow Level of Connection -->
                 <div class="feature-card">
                     <h3>Shallow Level of Connection</h3>
@@ -282,5 +285,19 @@
                 <a href="#privacy">Privacy Policy</a>
             </p>
         </footer>
+
+        <script>
+            fetch("/isauthed")
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.isAuthed) {
+                        document.getElementById("pf").innerHTML =
+                            "Your Profile";
+                        document.querySelector("nav").innerHTML =
+                            `<a href="/matches">Matches</a><a href="/profile/me">Your Profile</a><a href="/chat">Chats</a><a href="/logout">Logout</a>`;
+                    }
+                });
+            fetch("/myuser");
+        </script>
     </body>
 </html>
