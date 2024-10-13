@@ -13,6 +13,7 @@ const {
   query,
   where,
   getDocs,
+  addDoc,
 } = require("firebase/firestore");
 
 app.set("view engine", "ejs");
@@ -82,23 +83,22 @@ app.post("/profile/edit", requiresAuth(), async (req, res) => {
 });
 
 app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
-  const { duid } = req.params; // Destination user ID
-  const { uid } = req.body; // Source user ID
+  const duid = req.params.destuser; // Destination user ID
+  const uid = req.oidc.user.sub; // Source user ID
 
-  // create a new chat between the two users
+  // Create a new chat between the two users
   const chat = {
     messages: [],
     users: [uid, duid],
   };
 
   const chatRef = collection(db, "chats");
-  const newChat = setDoc(chatRef, chat)
-    .then(() => {
-      res.json({ success: true, chat: chat });
-    })
-    .catch((error) => {
-      res.status(500).json({ success: false, message: error });
-    });
+  try {
+    const newChatDoc = await addDoc(chatRef, chat);
+    res.json({ success: true, chat: chat, chatId: newChatDoc.id });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 app.get("/chats", requiresAuth(), async (req, res) => {
@@ -335,11 +335,11 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     const matches = users.filter((user) => {
       return (
         user.uid !== uid && // Use user.id to exclude the target user
-
-        (
-          user.schools.filter(x => targetUser.schools.includes(x)).length + 
-          user.interests.filter(x => targetUser.interests.includes(x)).length * 2 >= 3
-        )
+        user.schools.filter((x) => targetUser.schools.includes(x)).length +
+          user.interests.filter((x) => targetUser.interests.includes(x))
+            .length *
+            2 >=
+          3
       );
     });
 
