@@ -39,6 +39,7 @@
             </nav>
             <article style="margin-top: 30px">
                 <img
+                    id="pfp"
                     src="/assets/profile.png"
                     style="border-radius: 9999px; width: 120px"
                 />
@@ -110,6 +111,9 @@
                                             "bio",
                                         ).innerText = data.bio;
                                     }
+
+                                    document.getElementById("pfp").src =
+                                        data.picture;
 
                                     document.getElementById(
                                         "username",
