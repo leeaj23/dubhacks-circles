@@ -41,7 +41,7 @@ const db = getFirestore(firebaseApp);
 const config = {
   authRequired: false,
   auth0Logout: true,
-  baseURL: "http://localhost:3000",
+  baseURL: "https://dubhacks.james.baby",
   clientID: "2xEeiTf21ZTJpXmdPNV5X2dDOEJG81MJ",
   issuerBaseURL: "https://circlesapp.us.auth0.com",
   secret: "deda53d80e511a29137f3983e7bc9334b8a078831d215d1f6067ddf989843686",
@@ -464,7 +464,7 @@ app.get("/suggestion/:location", requiresAuth(), async (req, res) => {
           {
             role: "system",
             content:
-              "You are suggesting date ideas for a couple which just met. Only include the list of locations, not any text before the list.",
+              "You are suggesting date ideas for a couple which just met. Only include the list of locations, not any text before the list. Give up to 3 suggestions",
           },
           {
             role: "user",
