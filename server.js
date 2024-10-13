@@ -396,3 +396,36 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     res.status(500).send("Failed to fetch users or update Firestore");
   }
 });
+
+app.get("/suggestion/:location", requiresAuth(), async (req, res) => {
+  const location = req.params.location;
+
+  try {
+    // API call to fetch suggestions based on location
+    const apiKey = "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"; // Replace with your actual API key
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=activities+in+${encodeURIComponent(
+      location,
+    )}&key=${apiKey}`;
+
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const suggestions = data.results.map((result) => ({
+        name: result.name,
+        address: result.formatted_address,
+        rating: result.rating,
+      }));
+
+      res.json({ success: true, suggestions: suggestions });
+    } else {
+      res.json({
+        success: false,
+        message: "No suggestions found for the given location.",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch suggestions." });
+  }
+})
