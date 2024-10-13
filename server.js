@@ -13,7 +13,7 @@ const {
   getDocs,
 } = require("firebase/firestore");
 
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -59,6 +59,46 @@ app.get("/profile/:uid", requiresAuth(), async (req, res) => {
   }
 });
 
+app.post("/profile/edit", requiresAuth(), async (req, res) => {
+  const { bio, interests, schools } = req.body;
+  const uid = req.oidc.user.sub;
+
+  const docRef = doc(db, "users", uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const user = docSnap.data();
+    user.bio = bio;
+    user.interests = interests;
+    user.schools = schools;
+    setDoc(docRef, user).then(() => {
+      res.json({ success: true, user: user });
+    });
+  } else {
+    res.status(404).json({ success: false, message: "User not found" });
+  }
+});
+
+app.post("/chats/:destuser", requiresAuth(), async (req, res) => {
+  const { duid } = req.params; // Destination user ID
+  const { uid } = req.body; // Source user ID
+
+  // create a new chat between the two users
+  const chat = {
+    messages: [],
+    users: [uid, duid],
+  };
+
+  const chatRef = collection(db, "chats");
+  const newChat = setDoc(chatRef, chat)
+    .then(() => {
+      res.json({ success: true, chat: chat });
+    })
+    .catch((error) => {
+      res.status(500).json({ success: false, message: error });
+    });
+});
+
 app.get("/isauthed", (req, res) => {
   if (req.oidc.isAuthenticated()) {
     res.json({ isAuthed: req.oidc.isAuthenticated(), uid: req.oidc.user.sub });
@@ -83,7 +123,7 @@ app.get("/myuser", requiresAuth(), (req, res) => {
         interests: [],
         schools: [],
         bio: "",
-        matches: []
+        matches: [],
       };
 
       setDoc(docRef, user).then(() => {
@@ -146,7 +186,7 @@ app.get("/matches", requiresAuth(), async (req, res) => {
     }
     const matches = docSnap.data().matches;
     console.log(matches);
-    res.render('matches', {'matches': matches});
+    res.render("matches", { matches: matches });
   } else {
     res.status(404).json({ success: false, message: "User not found" });
   }

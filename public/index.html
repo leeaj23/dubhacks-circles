@@ -1,143 +1,284 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>Circles - Find Your Perfect Match</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                color: #333;
+            }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> -->
-    <title>Circles - Find Your Perfect Match</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            color: #333;
-        }
+            header {
+                background-color: #fec20f;
+                color: white;
+                padding: 20px 0;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+            }
 
-        header {
-            background-color: #000000;
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
+            header img {
+                width: 50px;
+                height: 50px;
+            }
 
-        header img {
-            width: 50px;
-            height: 50px;
-        }
+            header h1 {
+                font-size: 3em;
+                margin: 0;
+            }
 
-        header h1 {
-            font-size: 3em;
-            margin: 0;
-        }
+            nav {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin: 20px 0;
+            }
 
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
+            nav a {
+                text-decoration: none;
+                color: #333;
+                font-size: 1.2em;
+                padding: 10px 20px;
+                border: 2px solid #fec20f;
+                border-radius: 5px;
+            }
 
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-size: 1.2em;
-            padding: 10px 20px;
-            border: 2px solid #fec20f;
-            border-radius: 5px;
-        }
+            nav a:hover {
+                background-color: #fec20f;
+                color: white;
+            }
 
-        nav a:hover {
-            background-color: #fec20f;
-            color: white;
-        }
+            /* Parallax Section */
+            .parallax {
+                background-image: url("assets/1.png");
+                height: 500px;
+                background-attachment: fixed;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-align: center;
+            }
 
-        .hero {
-            text-align: center;
-            padding: 50px 20px;
-            background: url('1.png') no-repeat center center/cover;
-            color: white;
-        }
+            .parallax h2 {
+                font-size: 3em;
+                margin-bottom: 20px;
+            }
 
-        .hero h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
+            .parallax p {
+                font-size: 1.5em;
+                margin-bottom: 40px;
+            }
 
-        .hero p {
-            font-size: 1.2em;
-            margin-bottom: 40px;
-        }
+            .cta-button {
+                background-color: #fec20f;
+                color: white;
+                padding: 15px 30px;
+                text-transform: uppercase;
+                font-size: 1.2em;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
 
-        .cta-button {
-            background-color: #fec20f;
-            color: white;
-            padding: 15px 30px;
-            text-transform: uppercase;
-            font-size: 1.2em;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+            .cta-button:hover {
+                background-color: #ffcf50;
+            }
 
-        .cta-button:hover {
-            background-color: #ffcf50;
-        }
+            section.content {
+                padding: 50px;
+                background-color: white;
+                text-align: center;
+            }
 
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            margin-top: 50px;
-        }
+            /* Feature Cards */
+            .features-section {
+                display: flex;
+                justify-content: space-around;
+                padding: 50px 0;
+            }
 
-        footer p {
-            margin: 0;
-        }
+            .feature-card {
+                background-color: #fff;
+                border: 2px solid #fec20f;
+                border-radius: 10px;
+                width: 30%;
+                padding: 20px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                margin-right: 10px;
+            }
 
-        footer a {
-            color: #fec20f;
-            text-decoration: none;
-        }
-    </style>
-</head>
+            .feature-card:hover {
+                transform: translateY(-10px);
+            }
 
-<body>
+            .feature-card h3 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
 
-    <header>
-        <img src="assets/icon.png" alt="Circles Logo" 
-            width="400" 
-            height ="400"/>
-        
-        <h1>Circles</h1>
-    </header>
+            .feature-card p {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
 
-    <nav>
-        <a href="#about">About Us</a>
-        <a href="#features">Features</a>
-        <a href="#sign-up">Sign Up</a>
-        <a href="#login">Login</a>
-    </nav>
+            /* Solution reveal on hover */
+            .feature-card .solution {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 90%;
+                background-color: #fec20f;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                transition: top 0.3s ease;
+            }
 
-    <section class="hero">
-        <h2>Connect with Like-minded People</h2>
-        <p>Join thousands of singles who have found love through Circles. Your match is just a click away.</p>
-        <button class="cta-button" onclick="window.location.href='#sign-up'">Join Now</button>
-    </section>
+            .feature-card:hover .solution {
+                top: 0;
+            }
 
-    <footer>
-        <p>&copy; 2024 Circles. All rights reserved.</p>
-        <p><a href="#terms">Terms of Service</a> | <a href="#privacy">Privacy Policy</a></p>
-    </footer>
+            footer {
+                background-color: #333;
+                color: white;
+                padding: 20px 0;
+                text-align: center;
+                margin-top: 50px;
+            }
 
-</body>
+            footer p {
+                margin: 0;
+            }
 
+            footer a {
+                color: #fec20f;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <img
+                src="assets/circlesbs.png"
+                alt="Circles Logo"
+                style="width: 220px"
+            />
+        </header>
+
+        <nav>
+            <a href="#about">About Us</a>
+            <a href="#features">Features</a>
+            <a href="#sign-up">Sign Up</a>
+            <a href="#login">Login</a>
+        </nav>
+
+        <!-- Parallax Section -->
+        <section class="parallax">
+            <div>
+                <h2>Connect with Like-minded People</h2>
+                <p>
+                    Join thousands of singles who have found love through
+                    Circles. Your match is just a click away.
+                </p>
+                <button
+                    class="cta-button"
+                    onclick="window.location.href='#sign-up'"
+                >
+                    Join Now
+                </button>
+            </div>
+        </section>
+
+        <!-- Content Section -->
+        <section class="content">
+            <h2>Why Circles?</h2>
+            <p>
+                Our platform offers unique features to help you find your
+                perfect match.
+            </p>
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <!-- Card 1: Shallow Level of Connection -->
+                <div class="feature-card">
+                    <h3>Shallow Level of Connection</h3>
+                    <p>
+                        Many users complain about the lack of meaningful
+                        connections on dating apps, as matching is often based
+                        on superficial criteria like looks and location.
+                    </p>
+                    <div class="solution">
+                        <h3>Our Solution</h3>
+                        <p>
+                            Circles encourages deeper connections by using
+                            interest-based matching, meaningful conversation
+                            starters, and curated profiles to foster genuine
+                            relationships.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 2: Boring Conversations -->
+                <div class="feature-card">
+                    <h3>Boring Conversations</h3>
+                    <p>
+                        The prevalence of pickup lines and generic messages has
+                        led to uninteresting and meaningless small talk on
+                        dating apps.
+                    </p>
+                    <div class="solution">
+                        <h3>Our Solution</h3>
+                        <p>
+                            Circles promotes dynamic conversation starters and
+                            personality-based prompts that lead to more engaging
+                            and fun interactions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Unreliability -->
+                <div class="feature-card">
+                    <h3>Unreliability</h3>
+                    <p>
+                        It’s tough for startups to keep up with trends without a
+                        big team or resources, making some platforms less
+                        reliable in delivering on promises.
+                    </p>
+                    <div class="solution">
+                        <h3>Our Solution</h3>
+                        <p>
+                            Circles is constantly updated with new features and
+                            feedback-driven enhancements, ensuring a reliable
+                            and evolving platform.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2024 Circles. All rights reserved.</p>
+            <p>
+                <a href="#terms">Terms of Service</a> |
+                <a href="#privacy">Privacy Policy</a>
+            </p>
+        </footer>
+    </body>
 </html>
-

@@ -27,12 +27,9 @@
                 <ul>
                     <li>
                         <a href="/"
-                            ><img src="/assets/icon.png" style="width: 150px"
-                        /></a>
-                    </li>
-                    <li>
-                        <a href="/"
-                            ><img src="/assets/text.png" style="width: 150px"
+                            ><img
+                                src="/assets/circlesbs.png"
+                                style="width: 200px"
                         /></a>
                     </li>
                 </ul>
@@ -67,6 +64,7 @@
                 ></div>
                 <hr />
                 <div
+                    id="bioContainer"
                     style="
                         display: inline-block;
                         vertical-align: top;
@@ -83,9 +81,7 @@
             </article>
         </main>
         <script>
-            // get /isauthed
-            //
-
+            // Fetch authentication and user data
             fetch("/isauthed")
                 .then((res) => res.json())
                 .then((data) => {
@@ -99,7 +95,7 @@
                     if (data.isAuthed) {
                         var id = data.uid;
                         console.log("User is authenticated with ID: " + id);
-                        // fetch user data
+                        // Fetch user data
                         fetch("/profile/" + id)
                             .then((res) => res.json())
                             .then((data) => {
@@ -124,13 +120,15 @@
                                         ).innerText =
                                             data.schools[
                                                 data.schools.length - 1
-                                            ].name;
+                                            ];
                                     } else {
                                         document.getElementById(
                                             "lastSchool",
                                         ).innerHTML =
                                             "<i>No schools provided</i>";
                                     }
+                                    // Store user data for later use
+                                    window.userData = data;
                                 } else {
                                     window.location.href = "/";
                                 }
@@ -139,6 +137,246 @@
                         window.location.href = "/login";
                     }
                 });
+
+            // Add event listener for the Edit Profile button
+            document.addEventListener("DOMContentLoaded", function () {
+                document
+                    .getElementById("editProfile")
+                    .addEventListener("click", function () {
+                        var editButton = this;
+                        if (editButton.innerText === "Edit Profile") {
+                            // Change to edit mode
+                            enterEditMode();
+                            editButton.innerText = "Save Profile";
+                        } else {
+                            // Save changes
+                            saveProfile();
+                            editButton.innerText = "Edit Profile";
+                        }
+                    });
+            });
+
+            function enterEditMode() {
+                // Replace bio with textarea
+                var bioElement = document.getElementById("bio");
+                var bioText = bioElement.innerText;
+                var textarea = document.createElement("textarea");
+                textarea.id = "bioTextarea";
+                textarea.style.fontSize = "26px";
+                textarea.style.width = "100%";
+                if (bioText === "No bio provided") {
+                    bioText = "";
+                }
+                textarea.placeholder = "Write a short bio...";
+
+                textarea.value = bioText;
+                bioElement.parentNode.replaceChild(textarea, bioElement);
+
+                // Remove lastSchool element
+                var lastSchoolElement = document.getElementById("lastSchool");
+                if (lastSchoolElement) {
+                    lastSchoolElement.parentNode.removeChild(lastSchoolElement);
+                }
+
+                // Add dynamic lists for interests and previous schools
+                var container = document.createElement("div");
+                container.id = "editContainer";
+                container.style.marginTop = "20px";
+
+                // Interests
+                var interestsLabel = document.createElement("label");
+                interestsLabel.innerText = "Interests:";
+                interestsLabel.style.display = "block";
+
+                var interestsList = document.createElement("div");
+                interestsList.id = "interestsList";
+
+                var addInterestBtn = document.createElement("button");
+                addInterestBtn.type = "button";
+                addInterestBtn.innerText = "Add Interest";
+                addInterestBtn.addEventListener("click", function () {
+                    addInterestField("");
+                });
+
+                container.appendChild(interestsLabel);
+                container.appendChild(addInterestBtn);
+                container.appendChild(interestsList);
+
+                // Previous Schools
+                var schoolsLabel = document.createElement("label");
+                schoolsLabel.innerText = "Previous Schools:";
+                schoolsLabel.style.display = "block";
+                schoolsLabel.style.marginTop = "20px";
+
+                var schoolsList = document.createElement("div");
+                schoolsList.id = "schoolsList";
+
+                var addSchoolBtn = document.createElement("button");
+                addSchoolBtn.type = "button";
+                addSchoolBtn.innerText = "Add School";
+                addSchoolBtn.addEventListener("click", function () {
+                    addSchoolField("");
+                });
+
+                container.appendChild(schoolsLabel);
+                container.appendChild(addSchoolBtn);
+                container.appendChild(schoolsList);
+
+                // Insert container after textarea
+                textarea.parentNode.insertBefore(
+                    container,
+                    textarea.nextSibling,
+                );
+
+                // Pre-fill interests and schools if available
+                if (window.userData) {
+                    if (window.userData.interests) {
+                        window.userData.interests.forEach(function (interest) {
+                            addInterestField(interest);
+                        });
+                    }
+                    if (window.userData.schools) {
+                        window.userData.schools.forEach(function (school) {
+                            addSchoolField(school);
+                        });
+                    }
+                }
+            }
+
+            function addInterestField(value) {
+                var interestsList = document.getElementById("interestsList");
+
+                var fieldContainer = document.createElement("div");
+                fieldContainer.style.display = "flex";
+                fieldContainer.style.marginTop = "5px";
+
+                var input = document.createElement("input");
+                input.type = "text";
+                input.value = value;
+                input.style.flex = "1";
+                input.placeholder = "Enter an interest";
+
+                var removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.innerText = "X";
+                removeBtn.style.marginLeft = "5px";
+                removeBtn.addEventListener("click", function () {
+                    interestsList.removeChild(fieldContainer);
+                });
+
+                fieldContainer.appendChild(input);
+                fieldContainer.appendChild(removeBtn);
+                interestsList.appendChild(fieldContainer);
+            }
+
+            function addSchoolField(value) {
+                var schoolsList = document.getElementById("schoolsList");
+
+                var fieldContainer = document.createElement("div");
+                fieldContainer.style.display = "flex";
+                fieldContainer.style.marginTop = "5px";
+
+                var input = document.createElement("input");
+                input.type = "text";
+                input.value = value;
+                input.style.flex = "1";
+                input.placeholder = "Enter a school";
+
+                var removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.innerText = "X";
+                removeBtn.style.marginLeft = "5px";
+                removeBtn.addEventListener("click", function () {
+                    schoolsList.removeChild(fieldContainer);
+                });
+
+                fieldContainer.appendChild(input);
+                fieldContainer.appendChild(removeBtn);
+                schoolsList.appendChild(fieldContainer);
+            }
+
+            function saveProfile() {
+                // Get updated bio
+                var updatedBio = document.getElementById("bioTextarea").value;
+
+                // Get interests
+                var interestsInputs = document.querySelectorAll(
+                    "#interestsList input",
+                );
+                var updatedInterests = [];
+                interestsInputs.forEach(function (input) {
+                    if (input.value.trim() !== "") {
+                        updatedInterests.push(input.value.trim());
+                    }
+                });
+
+                // Get schools
+                var schoolsInputs =
+                    document.querySelectorAll("#schoolsList input");
+                var updatedSchools = [];
+                schoolsInputs.forEach(function (input) {
+                    if (input.value.trim() !== "") {
+                        updatedSchools.push(input.value.trim());
+                    }
+                });
+
+                // Replace textarea with paragraph
+                var bioParagraph = document.createElement("p");
+                bioParagraph.id = "bio";
+                bioParagraph.style.fontSize = "26px";
+                bioParagraph.innerText = updatedBio;
+                var textarea = document.getElementById("bioTextarea");
+                textarea.parentNode.replaceChild(bioParagraph, textarea);
+
+                // Remove the editContainer
+                var container = document.getElementById("editContainer");
+                container.parentNode.removeChild(container);
+
+                // Re-add lastSchool element if previous schools were provided
+                var lastSchoolElement = document.createElement("p");
+                lastSchoolElement.id = "lastSchool";
+                if (updatedSchools.length > 0) {
+                    lastSchoolElement.innerText =
+                        updatedSchools[updatedSchools.length - 1];
+                } else {
+                    lastSchoolElement.innerHTML = "<i>No schools provided</i>";
+                }
+                var usernameElement = document.getElementById("username");
+                usernameElement.parentNode.insertBefore(
+                    lastSchoolElement,
+                    usernameElement.nextSibling,
+                );
+
+                // Send data to the server
+                fetch("/profile/edit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        bio: updatedBio,
+                        interests: updatedInterests,
+                        schools: updatedSchools,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            // Update the userData with new values
+                            window.userData.bio = updatedBio;
+                            window.userData.interests = updatedInterests;
+                            window.userData.schools = updatedSchools;
+                            alert("Profile updated successfully!");
+                        } else {
+                            // Handle error
+                            alert("Error saving profile: " + data.message);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        alert("An error occurred while saving your profile.");
+                    });
+            }
         </script>
     </body>
 </html>
