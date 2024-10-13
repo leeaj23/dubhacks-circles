@@ -23,11 +23,29 @@
     </head>
     <body>
         <main class="container">
-            <img
-                src="/assets/text.png"
-                style="width: 150px; margin-top: 10px"
-            />
-            <article style="margin-top: 30px">
+            <nav>
+                <ul>
+                    <li>
+                        <a href="/"
+                            ><img
+                                src="/assets/circlesbs.png"
+                                style="width: 200px"
+                        /></a>
+                    </li>
+                </ul>
+                <ul id="actions">
+                    <h6
+                        id="cw"
+                        style="float: right; transform: translateY(10px)"
+                    ></h6>
+
+                    <li><a href="/chat">Back</a></li>
+                </ul>
+            </nav>
+            <article
+                id="atc"
+                style="margin-top: 30px; height: 70vh; overflow: auto"
+            >
                 <div id="chatMsgContainer">
                     <div
                         id="chatTemplate"
@@ -60,20 +78,31 @@
             var username = "";
             var myuid = "";
 
+            const scrollToBottomWithSmoothScroll = () => {
+                var id = "atc";
+                const element = document.getElementById(id);
+                element.scrollTop = element.scrollHeight;
+            };
+
+            const chatMsgContainer =
+                document.getElementById("chatMsgContainer");
+            const chatTemplate = document.getElementById("chatTemplate");
+
+            var hasLoaded = false;
+
             function rl() {
                 fetch("/chats/" + id)
                     .then((res) => res.json())
                     .then((data) => {
                         data = data.chat;
 
-                        const chatMsgContainer =
-                            document.getElementById("chatMsgContainer");
-                        const chatTemplate =
-                            document.getElementById("chatTemplate");
-
                         chatMsgContainer.innerHTML = "";
 
+                        var it = 0;
+
                         data.messages.forEach((msg) => {
+                            it += 1;
+
                             const clone = chatTemplate.cloneNode(true);
                             const uname = clone.querySelector(".uname");
                             const umsg = clone.querySelector(".umsg");
@@ -93,8 +122,28 @@
                             uname.textContent = msgUser;
                             umsg.textContent = msg.message;
 
+                            document.getElementById("cw").textContent =
+                                "Chatting with " +
+                                data.otherUserNames[0] +
+                                "  |";
+
                             chatMsgContainer.appendChild(clone);
                         });
+
+                        if (!hasLoaded) {
+                            scrollToBottomWithSmoothScroll();
+                            hasLoaded = true;
+                        }
+
+                        if (it == 0) {
+                            const p = document.createElement("p");
+                            p.id = "noMsg";
+                            p.textContent =
+                                "No messages yet, send one to start chatting with " +
+                                data.otherUserNames[0] +
+                                "!";
+                            chatMsgContainer.appendChild(p);
+                        }
                     });
             }
 
@@ -108,13 +157,31 @@
 
                     setInterval(() => {
                         rl();
-                    }, 500);
+                    }, 1000);
                 });
 
             const chatMsgInput = document.getElementById("chatMsgInput");
             // detect enter key
             chatMsgInput.addEventListener("keyup", (e) => {
                 if (e.key === "Enter") {
+                    const clone = chatTemplate.cloneNode(true);
+                    const uname = clone.querySelector(".uname");
+                    const umsg = clone.querySelector(".umsg");
+
+                    clone.style.display = "block";
+                    uname.textContent = username;
+                    umsg.textContent = chatMsgInput.value;
+
+                    if (document.getElementById("noMsg")) {
+                        document.getElementById("noMsg").remove();
+                    }
+
+                    chatMsgContainer.appendChild(clone);
+                    var input = chatMsgInput.value;
+                    chatMsgInput.value = "";
+
+                    scrollToBottomWithSmoothScroll();
+
                     // POST /chats/uid
                     fetch("/chats/" + id + "/messages", {
                         method: "POST",
@@ -123,10 +190,9 @@
                         },
                         body: JSON.stringify({
                             id: myuid,
-                            message: chatMsgInput.value,
+                            message: input,
                         }),
                     }).then(() => {
-                        chatMsgInput.value = "";
                         rl();
                     });
                 }

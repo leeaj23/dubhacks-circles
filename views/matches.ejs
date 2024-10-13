@@ -10,12 +10,7 @@
                 <ul>
                     <li>
                         <a href="/"
-                            ><img src="../assets/icon.png" style="width: 150px"
-                        /></a>
-                    </li>
-                    <li>
-                        <a href="/"
-                            ><img src="../assets/text.png" style="width: 150px"
+                            ><img src="/assets/circlesbs.png" style="width: 200px"
                         /></a>
                     </li>
                 </ul>
@@ -29,10 +24,10 @@
                 <p>
                 <table class="table table-bordered">
                 <% matches.forEach( (match) => { %>
-                    <tr>      
-                    <td><b><%= match.name %></b></td> 
-                    <td><a href="/profile/?id=<%= match.uid %>">View</a></td> 
-                    </tr>                      
+                    <tr>
+                    <td><b><%= match.name %></b></td>
+                    <td><a href="/profile/?id=<%= match.uid %>">View</a></td>
+                    </tr>
                 <% }) %>
                 </table>
                 </p>
@@ -46,9 +41,10 @@
                 .then((data) => {
                     if (data.isAuthed) {
                         document.getElementById("actions").innerHTML = `
-                  <li><a href="/">Home</a></li>
-                  <li><a href="/profile/me">Your Profile</a></li>
-                  <li><a href="/logout">Logout</a></li>
+                  <li><a href="/matches">Matches</a></li>
+              <li><a href="/chat">Chats</a></li>
+              <li><a href="/profile/me">Your Profile</a></li>
+              <li><a href="/logout">Logout</a></li>
                 `;
                     }
                 });
